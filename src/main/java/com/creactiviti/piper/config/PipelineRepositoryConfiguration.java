@@ -17,6 +17,8 @@ package com.creactiviti.piper.config;
 
 import java.util.List;
 
+import com.creactiviti.piper.core.pipeline.*;
+import com.creactiviti.piper.core.pipeline.DbPipelineRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -24,11 +26,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.annotation.Order;
-
-import com.creactiviti.piper.core.pipeline.GitPipelineRepository;
-import com.creactiviti.piper.core.pipeline.PipelineRepository;
-import com.creactiviti.piper.core.pipeline.PipelineRepositoryChain;
-import com.creactiviti.piper.core.pipeline.ResourceBasedPipelineRepository;
 
 @Configuration
 @EnableConfigurationProperties(PiperProperties.class)
@@ -62,6 +59,14 @@ public class PipelineRepositoryConfiguration {
     gitPipelineRepository.setSearchPaths(piperProperties.getPipelineRepository().getGit().getSearchPaths());
     gitPipelineRepository.setBranch(piperProperties.getPipelineRepository().getGit().getBranch());
     return gitPipelineRepository;
-  }  
-  
+  }
+
+  @Bean
+  @Order(4)
+  @ConditionalOnProperty(name="piper.pipeline-repository.db.enabled", havingValue="true")
+  DbPipelineRepository dbPipelineRepository (PiperProperties piperProperties) {
+    DbPipelineRepository dbPipelineRepository = new DbPipelineRepository();
+    return dbPipelineRepository;
+  }
+
 }

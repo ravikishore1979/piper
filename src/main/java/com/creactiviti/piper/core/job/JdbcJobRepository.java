@@ -65,7 +65,7 @@ public class JdbcJobRepository implements JobRepository {
     Integer totalItems = jdbc.getJdbcOperations().queryForObject("select count(*) from job",Integer.class);
     int offset = (aPageNumber-1) * DEFAULT_PAGE_SIZE;
     int limit = DEFAULT_PAGE_SIZE;
-    List<Job> items = jdbc.query(String.format("select * from job order by create_time desc offset %s limit %s",offset,limit),this::jobRowMappper);
+    List<Job> items = jdbc.query(String.format("select * from job order by create_time desc limit %s, %s",offset,limit),this::jobRowMappper);
     ResultPage<Job> resultPage = new ResultPage<>(Job.class);
     resultPage.setItems(items);
     resultPage.setNumber(items.size()>0?aPageNumber:0);
