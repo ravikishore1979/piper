@@ -56,8 +56,8 @@ public class DefaultTaskCompletionHandler implements TaskCompletionHandler {
   private ContextRepository contextRepository;
   private JobExecutor jobExecutor;
   private EventPublisher eventPublisher;
-  private TaskEvaluator taskEvaluator = new SpelTaskEvaluator(); 
-  
+  private TaskEvaluator taskEvaluator = new SpelTaskEvaluator();
+
   @Override
   public void handle (TaskExecution aTask) {
     log.debug("Completing task {}", aTask.getId());
@@ -87,6 +87,23 @@ public class DefaultTaskCompletionHandler implements TaskCompletionHandler {
     }
   }
 
+    @Override
+    public void handleWaitingState(TaskExecution aTask) {
+        log.debug("Waiting task {}", aTask.getId());
+        Job job = jobRepository.findJobByTaskId (aTask.getId());
+        if(job!=null) {
+            SimpleTaskExecution task = SimpleTaskExecution.createForUpdate(aTask);
+            task.setStatus(TaskStatus.WAITING);
+            jobTaskRepository.merge(task);
+            SimpleJob mjob = new SimpleJob (job);
+            wait(mjob);
+        }
+        else {
+            log.error("Unknown job: {}",aTask.getJobId());
+        }
+
+    }
+
   private boolean hasMoreTasks (Job aJob) {
     Pipeline pipeline = pipelineRepository.findOne(aJob.getPipelineId());
     return aJob.getCurrentTask()+1 < pipeline.getTasks().size();
@@ -96,7 +113,7 @@ public class DefaultTaskCompletionHandler implements TaskCompletionHandler {
     Pipeline pipeline = pipelineRepository.findOne(aJob.getPipelineId());
     List<Accessor> outputs = pipeline.getOutputs();
     Context context = contextRepository.peek(aJob.getId());
-    SimpleTaskExecution jobOutput = SimpleTaskExecution.create(); 
+    SimpleTaskExecution jobOutput = SimpleTaskExecution.create();
     for(Accessor output : outputs) {
       jobOutput.set(output.getRequiredString(DSL.NAME), output.getRequiredString(DSL.VALUE));
     }
@@ -110,11 +127,22 @@ public class DefaultTaskCompletionHandler implements TaskCompletionHandler {
     eventPublisher.publishEvent(PiperEvent.of(Events.JOB_STATUS, "jobId", aJob.getId(), "status", job.getStatus()));
     log.debug("Job {} completed successfully",aJob.getId());
   }
-  
+
+  private void wait (SimpleJob aJob) {
+    Pipeline pipeline = pipelineRepository.findOne(aJob.getPipelineId());
+    SimpleJob job = new SimpleJob((Job)aJob);
+    job.setStatus(JobStatus.WAITING);
+    job.setEndTime(new Date ());
+    job.setCurrentTask(-1);
+    jobRepository.merge(job);
+    eventPublisher.publishEvent(PiperEvent.of(Events.JOB_STATUS, "jobId", aJob.getId(), "status", job.getStatus()));
+    log.debug("Job {} went into waiting state.",aJob.getId());
+  }
+
   public void setJobRepository(JobRepository aJobRepository) {
     jobRepository = aJobRepository;
   }
-  
+
   public void setPipelineRepository(PipelineRepository aPipelineRepository) {
     pipelineRepository = aPipelineRepository;
   }
@@ -122,15 +150,15 @@ public class DefaultTaskCompletionHandler implements TaskCompletionHandler {
   public void setJobTaskRepository(TaskExecutionRepository aJobTaskRepository) {
     jobTaskRepository = aJobTaskRepository;
   }
-  
+
   public void setContextRepository(ContextRepository aContextRepository) {
     contextRepository = aContextRepository;
   }
-  
+
   public void setJobExecutor(JobExecutor aJobExecutor) {
     jobExecutor = aJobExecutor;
   }
-  
+
   public void setEventPublisher(EventPublisher aEventPublisher) {
     eventPublisher = aEventPublisher;
   }

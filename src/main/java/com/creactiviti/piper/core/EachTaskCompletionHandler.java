@@ -33,13 +33,13 @@ public class EachTaskCompletionHandler implements TaskCompletionHandler {
   private final TaskExecutionRepository taskExecutionRepo;
   private final TaskCompletionHandler taskCompletionHandler;
   private final CounterRepository counterRepository;
-  
+
   public EachTaskCompletionHandler(TaskExecutionRepository aTaskExecutionRepo, TaskCompletionHandler aTaskCompletionHandler, CounterRepository aCounterRepository) {
     taskExecutionRepo = aTaskExecutionRepo;
     taskCompletionHandler = aTaskCompletionHandler;
     counterRepository = aCounterRepository;
   }
-  
+
   @Override
   public void handle (TaskExecution aTaskExecution) {
     SimpleTaskExecution mtask = SimpleTaskExecution.createForUpdate(aTaskExecution);
@@ -54,6 +54,11 @@ public class EachTaskCompletionHandler implements TaskCompletionHandler {
       counterRepository.delete(aTaskExecution.getParentId());
     }
   }
+
+    @Override
+    public void handleWaitingState(TaskExecution aJobTask) {
+        //TODO implement Waiting state, like making the each task waiting and also parent.
+    }
 
   @Override
   public boolean canHandle (TaskExecution aTaskExecution) {

@@ -104,6 +104,7 @@ public class JmsMessengerConfiguration implements JmsListenerConfigurer {
       registerListenerEndpoint(aRegistrar, Queues.COMPLETIONS, coordinatorProperties.getSubscriptions().getCompletions() , coordinator, "complete");
       registerListenerEndpoint(aRegistrar, Queues.ERRORS, coordinatorProperties.getSubscriptions().getErrors(), coordinator, "handleError");
       registerListenerEndpoint(aRegistrar, Queues.EVENTS, coordinatorProperties.getSubscriptions().getEvents(), eventListener, "onApplicationEvent");
+      registerListenerEndpoint(aRegistrar, Queues.WAITING, coordinatorProperties.getSubscriptions().getEvents(), coordinator, "wait");
       registerListenerEndpoint(aRegistrar, Queues.JOBS, coordinatorProperties.getSubscriptions().getJobs(), coordinator, "start");
       registerListenerEndpoint(aRegistrar, Queues.SUBFLOWS, coordinatorProperties.getSubscriptions().getJobs(), coordinator, "create");
     }

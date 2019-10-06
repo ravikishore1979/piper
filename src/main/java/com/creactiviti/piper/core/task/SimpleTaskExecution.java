@@ -43,6 +43,7 @@ public class SimpleTaskExecution extends SimplePipelineTask implements TaskExecu
   
   private SimpleTaskExecution (Task aSource) {
     super(aSource);
+
   }
   
   @Override

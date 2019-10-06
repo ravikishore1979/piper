@@ -66,7 +66,7 @@ public class SwitchTaskCompletionHandler implements TaskCompletionHandler {
       newContext.put(aTaskExecution.getName(), aTaskExecution.getOutput());
       contextRepository.push(switchTask.getId(), newContext);
     }
-    
+
     List<MapObject> tasks = resolveCase(switchTask);
     if(aTaskExecution.getTaskNumber()<tasks.size()) {
       MapObject task = tasks.get(aTaskExecution.getTaskNumber());
@@ -106,6 +106,11 @@ public class SwitchTaskCompletionHandler implements TaskCompletionHandler {
       switchTask.setExecutionTime(switchTask.getEndTime().getTime()-switchTask.getStartTime().getTime());
       taskCompletionHandler.handle(switchTask);
     }
+  }
+
+  @Override
+  public void handleWaitingState(TaskExecution aJobTask) {
+    //TODO implement waiting state for the switch.
   }
 
   private List<MapObject> resolveCase (TaskExecution aSwitch) {

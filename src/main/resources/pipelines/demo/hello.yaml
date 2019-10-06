@@ -20,7 +20,12 @@ tasks:
   - label: Print a greeting
     type: print
     text: Hello ${yourName}
-       
+
+  - label: Human Task Test
+    type: humanTask
+    text: Hello Human ${yourName}
+    waitUntil: humanResponse
+
   - label: Sleep a little
     type: sleep
     millis: ${randomNumber}

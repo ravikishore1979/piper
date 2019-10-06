@@ -30,4 +30,6 @@ public interface TaskCompletionHandler {
   
   boolean canHandle (TaskExecution aJobTask);
 
+    void handleWaitingState(TaskExecution aJobTask);
+
 }

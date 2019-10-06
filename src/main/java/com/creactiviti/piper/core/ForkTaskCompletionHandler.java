@@ -61,20 +61,20 @@ public class ForkTaskCompletionHandler implements TaskCompletionHandler {
     taskDispatcher = aTaskDispatcher;
     contextRepository = aContextRepository;
   }
-  
+
   @Override
   public void handle (TaskExecution aTaskExecution) {
     SimpleTaskExecution mtask = SimpleTaskExecution.createForUpdate(aTaskExecution);
     mtask.setStatus(TaskStatus.COMPLETED);
     taskExecutionRepo.merge(mtask);
-    
+
     if(aTaskExecution.getOutput() != null && aTaskExecution.getName() != null) {
       Context context = contextRepository.peek(aTaskExecution.getParentId()+"/"+aTaskExecution.getInteger("branch"));
       MapContext newContext = new MapContext(context.asMap());
       newContext.put(aTaskExecution.getName(), aTaskExecution.getOutput());
       contextRepository.push(aTaskExecution.getParentId()+"/"+aTaskExecution.getInteger("branch"), newContext);
     }
-    
+
     TaskExecution fork = taskExecutionRepo.findOne(aTaskExecution.getParentId());
     List<List> list = fork.getList("branches", List.class);
     List<Map<String,Object>> branch = list.get(aTaskExecution.getInteger("branch"));
@@ -104,6 +104,11 @@ public class ForkTaskCompletionHandler implements TaskCompletionHandler {
         taskCompletionHandler.handle(forkTask);
       }
     }
+  }
+
+  @Override
+  public void handleWaitingState(TaskExecution aJobTask) {
+    //TODO need to implement Waiting state, Don't know how to implement this for Fork.
   }
 
   @Override

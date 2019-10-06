@@ -37,7 +37,17 @@ public class TaskCompletionHandlerChain implements TaskCompletionHandler {
   public boolean canHandle(TaskExecution aJobTask) {
     return true;
   }
-  
+
+  @Override
+  public void handleWaitingState(TaskExecution aJobTask) {
+    for(TaskCompletionHandler handler : taskCompletionHandlers) {
+      if(handler.canHandle(aJobTask)) {
+        handler.handleWaitingState(aJobTask);
+      }
+    }
+
+  }
+
   public void setTaskCompletionHandlers(List<TaskCompletionHandler> aTaskCompletionHandlers) {
     taskCompletionHandlers = aTaskCompletionHandlers;
   }

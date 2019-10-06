@@ -21,6 +21,7 @@ public enum JobStatus {
   STARTED,
   STOPPED,
   FAILED,
-  COMPLETED
+  COMPLETED,
+  WAITING
   
 }

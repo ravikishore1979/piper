@@ -23,6 +23,7 @@ import com.creactiviti.piper.core.event.PiperEvent;
 import com.creactiviti.piper.core.messenger.Messenger;
 import com.creactiviti.piper.core.messenger.Queues;
 import com.creactiviti.piper.core.task.*;
+import com.creactiviti.piper.core.taskhandler.interrupts.Wait;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,11 +86,17 @@ public class Worker {
             completion.setOutput(output);
           }
         }
-        completion.setStatus(TaskStatus.COMPLETED);
+
         completion.setProgress(100);
         completion.setEndTime(new Date());
         completion.setExecutionTime(System.currentTimeMillis()-startTime);
-        messenger.send(Queues.COMPLETIONS, completion);
+        if(taskHandler instanceof Wait) {
+          completion.setStatus(TaskStatus.WAITING);
+          messenger.send(Queues.WAITING, completion);
+        } else {
+          completion.setStatus(TaskStatus.COMPLETED);
+          messenger.send(Queues.COMPLETIONS, completion);
+        }
       }
       catch (InterruptedException e) {
         // ignore

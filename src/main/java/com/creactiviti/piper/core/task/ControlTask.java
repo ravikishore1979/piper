@@ -23,5 +23,6 @@ package com.creactiviti.piper.core.task;
 public interface ControlTask extends Task {
   
   static final String TYPE_CANCEL = "cancel";
-  
+  String TYPE_WAITING = "waiting";
+
 }

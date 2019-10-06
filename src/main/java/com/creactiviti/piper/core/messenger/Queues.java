@@ -28,5 +28,6 @@ public interface Queues {
   static final String CONTROL     = "x.control." + UUIDGenerator.generate();
   static final String TASKS       = "tasks";
   static final String EVENTS      = "events";
-  
+
+    String WAITING = "waiting";
 }

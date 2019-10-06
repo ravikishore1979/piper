@@ -27,7 +27,8 @@ public enum TaskStatus {
   STARTED(false), 
   FAILED(true), 
   CANCELLED(true), 
-  COMPLETED(true);
+  COMPLETED(true),
+  WAITING(false);
   
   private final boolean terminated;
   

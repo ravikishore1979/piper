@@ -75,6 +75,11 @@ public class SubflowJobStatusEventListener implements EventListener {
           coordinator.complete(completion);
           break;
         }
+        case WAITING:{
+          SimpleTaskExecution completion = SimpleTaskExecution.createForUpdate(taskExecutionRepository.findOne(job.getParentTaskExecutionId()));
+          coordinator.wait(completion);
+          break;
+        }
         default:
           throw new IllegalStateException("Unnown status: " + status);
       }

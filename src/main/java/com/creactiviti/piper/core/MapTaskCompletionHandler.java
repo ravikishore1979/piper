@@ -40,7 +40,7 @@ public class MapTaskCompletionHandler implements TaskCompletionHandler {
     taskCompletionHandler = aTaskCompletionHandler;
     counterRepository = aCounterRepository;
   }
-  
+
   @Override
   public void handle (TaskExecution aTaskExecution) {
     SimpleTaskExecution mtask = SimpleTaskExecution.createForUpdate(aTaskExecution);
@@ -56,6 +56,11 @@ public class MapTaskCompletionHandler implements TaskCompletionHandler {
       taskCompletionHandler.handle(parentExecution);
       counterRepository.delete(aTaskExecution.getParentId());
     }
+  }
+
+  @Override
+  public void handleWaitingState(TaskExecution aJobTask) {
+    //TODO implement waiting state, Don't know what this task.
   }
 
   @Override

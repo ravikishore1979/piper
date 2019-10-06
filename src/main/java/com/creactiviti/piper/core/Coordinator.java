@@ -219,6 +219,23 @@ public class Coordinator {
   }
 
   /**
+   * Change the status of the job to waiting for the current job and complex tasks like For, Switch.
+   *
+   * @param aTask
+   *          The task to waiting.
+   */
+  public void wait(TaskExecution aTask) {
+    try {
+      taskCompletionHandler.handleWaitingState(aTask);
+    }
+    catch (Exception e) {
+      SimpleTaskExecution exec = SimpleTaskExecution.createForUpdate(aTask);
+      exec.setError(new ErrorObject(e.getMessage(), ExceptionUtils.getStackFrames(e)));
+      handleError(exec);
+    }
+  }
+
+  /**
    * Handle an application error.
    * 
    * @param aErrorable

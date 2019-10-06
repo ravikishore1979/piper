@@ -35,7 +35,7 @@ public class ParallelTaskCompletionHandler implements TaskCompletionHandler {
   private TaskExecutionRepository taskExecutionRepo;
   private TaskCompletionHandler taskCompletionHandler;
   private CounterRepository counterRepository;
-  
+
   @Override
   public void handle (TaskExecution aTaskExecution) {
     SimpleTaskExecution mtask = SimpleTaskExecution.createForUpdate(aTaskExecution);
@@ -49,6 +49,11 @@ public class ParallelTaskCompletionHandler implements TaskCompletionHandler {
   }
 
   @Override
+  public void handleWaitingState(TaskExecution aJobTask) {
+    //TODO implement waiting state for the parallel task.
+  }
+
+  @Override
   public boolean canHandle (TaskExecution aTaskExecution) {
     String parentId = aTaskExecution.getParentId();
     if(parentId!=null) {
@@ -57,7 +62,7 @@ public class ParallelTaskCompletionHandler implements TaskCompletionHandler {
     }
     return false;
   }
-  
+
   public void setTaskExecutionRepository(TaskExecutionRepository aTaskExecutionRepo) {
     taskExecutionRepo = aTaskExecutionRepo;
   }
