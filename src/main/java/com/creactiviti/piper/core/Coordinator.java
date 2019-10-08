@@ -197,6 +197,36 @@ public class Coordinator {
     return mjob;
   }
 
+  /**
+   * Complete the current task and resume the execution of corresponding job.
+   *
+   * @param taskId
+   *          The id of the Task to complete.
+   * @param taskOutput
+   *          A Map that should be used as the output of the Task.
+   * @return The resumed job
+   */
+  public Job completeTaskAndResumeJob(String taskId, Map<String, Object> taskOutput) {
+
+    log.debug("Completing Task {}", taskId);
+    TaskExecution taskExecution = jobTaskRepository.findOne(taskId);
+    Assert.notNull(taskExecution, String.format("Unknown Task executionID %s", taskId));
+    Job job = jobRepository.findOne (taskExecution.getJobId());
+    Assert.notNull(job,String.format("Unknown job %s", taskExecution.getJobId()));
+    Assert.isTrue(job.getParentTaskExecutionId() == null,"Can't resume a subflow");
+    Assert.isTrue(JobStatus.WAITING.equals(job.getStatus()), "can't restart job " + job.getId() + " as it is " + job.getStatus());
+    SimpleJob mjob = new SimpleJob (job);
+    mjob.setStatus(JobStatus.STARTED);
+    jobRepository.merge(mjob);
+    eventPublisher.publishEvent(PiperEvent.of(Events.JOB_STATUS,"jobId",job.getId(),"status",job.getStatus()));
+
+    //TODO: Explore a way to avoid below type casting.
+    SimpleTaskExecution stask = (SimpleTaskExecution) taskExecution;
+    stask.set("taskCompleteInput", taskOutput);
+    messenger.send(Queues.RUN_WAITING_TASKS, stask);
+    return mjob;
+  }
+
   private boolean isRestartable (Job aJob) {
     return aJob.getStatus() == JobStatus.STOPPED || aJob.getStatus() == JobStatus.FAILED;
   }

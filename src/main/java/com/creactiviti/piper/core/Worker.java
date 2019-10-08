@@ -93,6 +93,7 @@ public class Worker {
         if(taskHandler instanceof Wait) {
           completion.setStatus(TaskStatus.WAITING);
           messenger.send(Queues.WAITING, completion);
+          eventPublisher.publishEvent(PiperEvent.of(Events.TASK_WAIT, "taskId", aTask.getId(), "jobId", aTask.getJobId()));
         } else {
           completion.setStatus(TaskStatus.COMPLETED);
           messenger.send(Queues.COMPLETIONS, completion);
@@ -124,7 +125,67 @@ public class Worker {
     }
     
   }
-  
+
+  /**
+   * Handle the execution of a {@link TaskExecution} that is waiting. Implementors
+   * are expected to execute the task asynchronously.
+   *
+   * @param aTask
+   *          The task to execute.
+   */
+  public void handleWaitingTask (TaskExecution aTask) {
+    Future<?> future = executors.submit(() -> {
+      try {
+        long startTime = aTask.getStartTime().getTime();
+        logger.debug("Received Waiting task: {}",aTask);
+        TaskHandler<?> taskHandler = taskHandlerResolver.resolve(aTask);
+        TaskEventHandler<?> eventHandler = (TaskEventHandler<?>)taskHandler;
+        Object output = eventHandler.hanldeEvent(aTask);
+        SimpleTaskExecution completion = SimpleTaskExecution.createForUpdate(aTask);
+        if(output!=null) {
+          if(completion.getOutput() != null) {
+            TaskExecution evaluated = taskEvaluator.evaluate(completion, new MapContext ("execution", new MapContext("output", output)));
+            completion = SimpleTaskExecution.createForUpdate(evaluated);
+          }
+          else {
+            completion.setOutput(output);
+          }
+        }
+
+        completion.setProgress(100);
+        completion.setEndTime(new Date());
+        completion.setExecutionTime(System.currentTimeMillis()-startTime);
+
+          completion.setStatus(TaskStatus.COMPLETED);
+          messenger.send(Queues.COMPLETIONS, completion);
+      }
+      catch (InterruptedException e) {
+        // ignore
+      }
+      catch (Exception e) {
+        Future<?> myFuture = taskExecutions.get(aTask.getId());
+        if(!myFuture.isCancelled()) {
+          handleException(aTask, e);
+        }
+      }
+      finally {
+        taskExecutions.remove(aTask.getId());
+      }
+    });
+
+    taskExecutions.put(aTask.getId(), future);
+
+    try {
+      future.get(calculateTimeout(aTask), TimeUnit.MILLISECONDS);
+    } catch (InterruptedException | ExecutionException | TimeoutException e) {
+      handleException(aTask, e);
+    }
+    catch (CancellationException e) {
+      logger.debug("Cancelled Waiting task: {}", aTask.getId());
+    }
+
+  }
+
   private void handleException (TaskExecution aTask, Exception aException) {
     logger.error(aException.getMessage(),aException);
     SimpleTaskExecution task = SimpleTaskExecution.createForUpdate(aTask);

@@ -27,4 +27,5 @@ public interface Events {
   public static final String TASK_PROGRESSED = "task.progressed";
 
   public static final String JOB_STATUS = "job.status";
+  String TASK_WAIT = "task.wait";
 }

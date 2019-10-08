@@ -268,5 +268,5 @@ public class SimpleTaskExecution extends SimplePipelineTask implements TaskExecu
   public static SimpleTaskExecution createFromMap (Map<String,Object> aSource) {
     return new SimpleTaskExecution(aSource);
   }
-  
+
 }

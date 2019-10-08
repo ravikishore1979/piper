@@ -18,6 +18,7 @@ package com.creactiviti.piper.config;
 import java.util.Arrays;
 import java.util.List;
 
+import com.creactiviti.piper.core.event.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -38,11 +39,6 @@ import com.creactiviti.piper.core.context.ContextRepository;
 import com.creactiviti.piper.core.error.ErrorHandler;
 import com.creactiviti.piper.core.error.ErrorHandlerChain;
 import com.creactiviti.piper.core.error.TaskExecutionErrorHandler;
-import com.creactiviti.piper.core.event.DistributedEventPublisher;
-import com.creactiviti.piper.core.event.JobStatusWebhookEventListener;
-import com.creactiviti.piper.core.event.TaskProgressedEventListener;
-import com.creactiviti.piper.core.event.TaskStartedEventListener;
-import com.creactiviti.piper.core.event.TaskStartedWebhookEventListener;
 import com.creactiviti.piper.core.job.JobRepository;
 import com.creactiviti.piper.core.messenger.Messenger;
 import com.creactiviti.piper.core.pipeline.PipelineRepository;
@@ -258,6 +254,11 @@ public class CoordinatorConfiguration {
   @Bean
   TaskStartedEventListener taskStartedEventListener () {
     return new TaskStartedEventListener(taskExecutionRepo, taskDispatcher());
+  }
+
+  @Bean
+  TaskWaitEventListener taskWaitEventListener () {
+    return new TaskWaitEventListener(taskExecutionRepo);
   }
 
   @Bean

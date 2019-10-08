@@ -93,8 +93,6 @@ public class DefaultTaskCompletionHandler implements TaskCompletionHandler {
         Job job = jobRepository.findJobByTaskId (aTask.getId());
         if(job!=null) {
             SimpleTaskExecution task = SimpleTaskExecution.createForUpdate(aTask);
-            task.setStatus(TaskStatus.WAITING);
-            jobTaskRepository.merge(task);
             SimpleJob mjob = new SimpleJob (job);
             wait(mjob);
         }
@@ -133,7 +131,6 @@ public class DefaultTaskCompletionHandler implements TaskCompletionHandler {
     SimpleJob job = new SimpleJob((Job)aJob);
     job.setStatus(JobStatus.WAITING);
     job.setEndTime(new Date ());
-    job.setCurrentTask(-1);
     jobRepository.merge(job);
     eventPublisher.publishEvent(PiperEvent.of(Events.JOB_STATUS, "jobId", aJob.getId(), "status", job.getStatus()));
     log.debug("Job {} went into waiting state.",aJob.getId());

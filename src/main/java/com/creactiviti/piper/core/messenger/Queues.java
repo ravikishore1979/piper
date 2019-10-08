@@ -29,5 +29,6 @@ public interface Queues {
   static final String TASKS       = "tasks";
   static final String EVENTS      = "events";
 
-    String WAITING = "waiting";
+  String WAITING = "waiting";
+  String RUN_WAITING_TASKS = "tasks.waiting";
 }

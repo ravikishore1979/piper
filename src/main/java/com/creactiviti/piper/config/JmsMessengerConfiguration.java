@@ -112,6 +112,7 @@ public class JmsMessengerConfiguration implements JmsListenerConfigurer {
       Map<String, Object> subscriptions = workerProperties.getSubscriptions();
       subscriptions.forEach((k,v) -> registerListenerEndpoint(aRegistrar, k, Integer.valueOf((String)v), worker, "handle"));
       registerListenerEndpoint(aRegistrar, Exchanges.CONTROL+"/"+Exchanges.CONTROL, 1, worker, "handle");
+      registerListenerEndpoint(aRegistrar, Queues.RUN_WAITING_TASKS, 1, worker, "handleWaitingTask");
     }
   }
 
