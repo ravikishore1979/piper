@@ -1,0 +1,37 @@
+label: waitTaskOutput
+
+inputs:
+  - name: yourName
+    label: Your Name
+    type: string
+    required: true
+    
+outputs:
+  - name: myMagicNumber
+    value: ${randomNumber}
+    
+tasks:
+  - name: randomNumber
+    label: Generate a random number
+    type: randomInt
+    startInclusive: 0
+    endInclusive: 5000
+      
+  - label: Print a greeting
+    type: print
+    text: Hello ${yourName}
+
+  - name: approval1
+    label: Human Task Test
+    type: humanTask
+    text: Hello Human ${yourName}
+    waitUntil: humanResponse
+
+  - label: Sleep a little
+    type: sleep
+    millis: ${randomNumber}
+    
+  - label: Print a farewell
+    type: print
+    text: Goodbye ${yourName} ==== ${approval1.msg} ==== ${approval1.subObj.k2}
+    
