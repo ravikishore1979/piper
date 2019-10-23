@@ -69,18 +69,19 @@ public class WorkflowController {
     }
 
     @PostMapping(value = "/workflows/{customerID}/{projectID}/{wfName}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<String> saveWorkflowJson(@PathVariable(name = "customerID") String customerID,
+    public ResponseEntity<ReleaseWorkflow> saveWorkflowJson(@PathVariable(name = "customerID") String customerID,
                                                    @PathVariable(name = "projectID") String projectID,
                                                    @PathVariable(name = "wfName") String workflowName,
                                                    @RequestBody ReleaseWorkflow workflow) throws IOException {
         log.info("Received workflow [{}]", workflowName);
 
         try {
-            workflowService.saveWorkflowWithPOJO(customerID, projectID, workflowName, workflow);
+            Workflow wf = workflowService.saveWorkflowWithPOJO(customerID, projectID, workflowName, workflow);
+            workflow.setWorkflowId(wf.getId());
         } catch (JsonProcessingException e) {
             log.error("Exception while parsing Workflow POJO {} [{}]", workflowName, workflow.toString(), e);
             throw e;
         }
-        return ResponseEntity.ok("SUccessfully saved.");
+        return ResponseEntity.ok(workflow);
     }
 }

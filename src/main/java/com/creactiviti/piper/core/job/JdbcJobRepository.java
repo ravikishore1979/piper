@@ -73,7 +73,15 @@ public class JdbcJobRepository implements JobRepository {
     resultPage.setTotalPages(items.size()>0?totalItems/DEFAULT_PAGE_SIZE+1:0);
     return resultPage;
   }
-      
+
+  @Override
+  public Page<Job> findRecentJobs(int limit) {
+    List<Job> items = jdbc.query(String.format("select * from job order by create_time desc limit %s", limit),this::jobRowMappper);
+    ResultPage<Job> resultPage = new ResultPage<>(Job.class);
+    resultPage.setItems(items);
+    return resultPage;
+  }
+
   @Override
   public Job merge (Job aJob) {
     MapSqlParameterSource sqlParameterSource = createSqlParameterSource(aJob);

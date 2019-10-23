@@ -10,6 +10,8 @@ import java.util.List;
 @Setter
 @ToString
 public class ReleaseWorkflow {
+
+    private long workflowId;
     private String label;
     private List<WorkflowIO> inputs;
     private List<WorkflowIO> outputs;

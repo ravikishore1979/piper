@@ -24,7 +24,9 @@ public interface JobRepository {
   Job findOne (String aId);
   
   void create (Job aJob);
-  
+
+  Page<Job> findRecentJobs(int limit);
+
   Job merge (Job aJob);
   
   Job findJobByTaskId (String aTaskId);

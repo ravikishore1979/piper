@@ -41,6 +41,7 @@ public class WorkflowService {
         Workflow wf = workflowRepository.findByCustomerIdAndProjectIdAndName(customerID, projectID, pipelineName);
         Assert.notNull(wf, String.format("Workflow not found for %s, %s, %s", customerID, projectID, pipelineName));
         ReleaseWorkflow rwf = yamlMapper.readValue(wf.getWorkflow(), ReleaseWorkflow.class);
+        rwf.setWorkflowId(wf.getId());
         return rwf;
     }
 
@@ -52,23 +53,23 @@ public class WorkflowService {
         return workflowRepository.findOne(id);
     }
 
-    public void saveWorkFlow(Workflow wf) {
+    public Workflow saveWorkFlow(Workflow wf) {
         log.debug("name exists debug: {}", workflowRepository.existsByCustomerIdAndProjectIdAndName(wf.getCustomerId(), wf.getProjectId(), wf.getName()));
         Workflow oldWf = workflowRepository.findByCustomerIdAndProjectIdAndName(wf.getCustomerId(), wf.getProjectId(), wf.getName());
         if(oldWf != null) {
             log.info("Workflow with name [{}] already exists in DB with ID [{}], updating.", oldWf.getName(), oldWf.getId());
             wf.setId(oldWf.getId());
         }
-        workflowRepository.save(wf);
+        return workflowRepository.save(wf);
     }
 
-    public void saveWorkflowWithPOJO(String customerID, String projectID, String workflowName, ReleaseWorkflow workflow) throws JsonProcessingException {
+    public Workflow saveWorkflowWithPOJO(String customerID, String projectID, String workflowName, ReleaseWorkflow workflow) throws JsonProcessingException {
         Workflow wf = new Workflow();
         wf.setCustomerId(customerID);
         wf.setProjectId(projectID);
         wf.setName(workflowName);
         wf.setWorkflow(yamlMapper.writeValueAsString(workflow));
-        saveWorkFlow(wf);
+        return saveWorkFlow(wf);
     }
 
     public Map<String, ReleaseWorkflow> getAllPipelinesByProject(String customerID, String projectID) {
@@ -80,6 +81,7 @@ public class WorkflowService {
             ReleaseWorkflow rwf = null;
             try {
                 rwf = yamlMapper.readValue(wf.getWorkflow(), ReleaseWorkflow.class);
+                rwf.setWorkflowId(wf.getId());
             } catch (IOException e) {
                 log.error("Unable to parse workflow string from DB for name {}", wf.getName(), e);
             }

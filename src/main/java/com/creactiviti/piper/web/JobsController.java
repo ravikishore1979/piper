@@ -50,6 +50,11 @@ public class JobsController {
   public Page<Job> list (@RequestParam(value="p",defaultValue="1") Integer aPageNumber) {
     return jobRepository.findAll(aPageNumber);
   }
+
+  @GetMapping(value="/recentjobs")
+  public Page<Job> getRecentJobs (@RequestParam(value="limit", defaultValue="10") Integer recordCount) {
+    return jobRepository.findRecentJobs(recordCount);
+  }
   
   @PostMapping("/jobs")
   public Job create (@RequestBody Map<String, Object> aJobRequest) {

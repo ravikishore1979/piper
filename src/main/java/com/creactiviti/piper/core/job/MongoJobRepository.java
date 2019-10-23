@@ -30,6 +30,7 @@ import javax.annotation.PostConstruct;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.mongodb.client.model.Filters.*;
@@ -109,6 +110,11 @@ public class MongoJobRepository implements JobRepository {
   public void create(Job aJob) {
     collection
         .insertOne(aJob);
+  }
+
+  @Override
+  public Page<Job> findRecentJobs(int limit) {
+    throw new NoSuchElementException("Not supported.");
   }
 
   @Override

@@ -49,4 +49,4 @@ create table if not exists pipelines (
     workflowname varchar(50) not null,
     script text,
     unique index name_ix (customerId, projectId, workflowname)
-);
+) AUTO_INCREMENT = 10000;
