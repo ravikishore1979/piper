@@ -1,7 +1,5 @@
 package com.creactiviti.piper.core.pipeline;
 
-import com.creactiviti.piper.core.pipeline.Pipeline;
-import com.creactiviti.piper.core.pipeline.YamlPipelineRepository;
 import com.creactiviti.piper.workflows.model.Workflow;
 import com.creactiviti.piper.workflows.services.WorkflowService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +17,7 @@ public class DbPipelineRepository extends YamlPipelineRepository {
     @Override
     public Pipeline findOne(String s) {
 
-        Workflow wf = workflowService.getPipelineByName(s);
+        Workflow wf = workflowService.getPipelineByID(s);
         if(wf == null) {
             throw new IllegalArgumentException(String.format("Pipeline with name '%s' not found.", s));
         }

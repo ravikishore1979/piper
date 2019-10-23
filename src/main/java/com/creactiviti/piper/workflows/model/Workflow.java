@@ -16,6 +16,10 @@ public class Workflow {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="workflowid")
     private Long id;
+    @Column(name="customerid")
+    private String customerId;
+    @Column(name="projectid")
+    private String projectId;
     @Column(name="workflowname")
     private String name;
     @Column(name="script")

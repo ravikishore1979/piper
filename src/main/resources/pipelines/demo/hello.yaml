@@ -21,7 +21,8 @@ tasks:
     type: print
     text: Hello ${yourName}
 
-  - label: Human Task Test
+  - name: approval1
+    label: Human Task Test
     type: humanTask
     text: Hello Human ${yourName}
     waitUntil: humanResponse
@@ -32,5 +33,5 @@ tasks:
     
   - label: Print a farewell
     type: print
-    text: Goodbye ${yourName}
+    text: Goodbye ${yourName} ==== ${approval1.msg} ==== ${approval1.subObj.k2}
     

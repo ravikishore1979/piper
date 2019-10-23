@@ -44,7 +44,9 @@ create table if not exists  counter (
 
 create table if not exists pipelines (
     workflowid bigint primary key AUTO_INCREMENT,
+    customerid varchar(50) not null,
+    projectid varchar(50) not null,
     workflowname varchar(50) not null,
     script text,
-    index name_ix (workflowname)
+    unique index name_ix (customerId, projectId, workflowname)
 );
