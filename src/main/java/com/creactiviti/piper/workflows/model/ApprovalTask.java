@@ -15,4 +15,7 @@ public class ApprovalTask extends WorkflowTask{
     private String waitForMessage;
     @Builder.Default
     private String type = "humanTask";
+    @Builder.Default
+    private TaskCategory taskCategory = TaskCategory.DEFAULT;
+    private String categoryFor;
 }
