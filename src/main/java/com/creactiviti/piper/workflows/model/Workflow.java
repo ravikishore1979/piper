@@ -17,16 +17,18 @@ public class Workflow {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="workflowid")
-    private Long id;
+    private long id;
     @Column(name="customerid")
     private String customerId;
     @Column(name="projectid")
     private String projectId;
     @Column(name="workflowname")
     private String name;
-
+    @Column(name = "createdby")
     private String createdBy;
+    @Column(name = "createdtime")
     private Date createdTime;
+    @Column(name = "headrevision")
     private long headRevision;
 }
 

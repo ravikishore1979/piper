@@ -106,7 +106,7 @@ public class ReleaseWorkflowTest {
 
         List<WorkflowTask> tasks = new ArrayList<>();
         tasks.add(RandomInt.builder()
-                .name("Stage1")
+                .name("randomNumber")
                 .label("RandomInt Stage 1")
                 .startInclusive(0)
                 .endInclusive(5000)

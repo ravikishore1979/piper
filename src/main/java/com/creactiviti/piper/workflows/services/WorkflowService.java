@@ -65,22 +65,34 @@ public class WorkflowService {
 
     public Workflow saveWorkFlow(Workflow wf, WorkflowVersion wfVersion) {
         boolean exists = false;
-        Workflow oldWf;
+        Workflow oldWf = null;
         if(wf.getId() > 0 ) {
             exists = workflowRepository.existsById(wf.getId());
             log.debug("Workflow with ID {} exists debug: {}", wf.getId(), exists);
-            oldWf = workflowRepository.findById(wf.getId());
+            if (exists) {
+                oldWf = workflowRepository.findById(wf.getId());
+            }
         } else {
             exists = workflowRepository.existsByCustomerIdAndProjectIdAndName(wf.getCustomerId(), wf.getProjectId(), wf.getName());
-            log.debug("workflow with customerID '{}' project '{}' and  name '{}'exists debug: {}", wf.getCustomerId(), wf.getProjectId(), wf.getName(), exists);
-            oldWf = workflowRepository.findByCustomerIdAndProjectIdAndName(wf.getCustomerId(), wf.getProjectId(), wf.getName());
-            wf.setId(oldWf.getId());
+            log.debug("workflow with customerID '{}' project '{}' and  name '{}'exists: {}", wf.getCustomerId(), wf.getProjectId(), wf.getName(), exists);
+            if(exists) {
+                oldWf = workflowRepository.findByCustomerIdAndProjectIdAndName(wf.getCustomerId(), wf.getProjectId(), wf.getName());
+            }
         }
 
         if (!exists) {
             return insertIntoDB(wf, wfVersion);
         } else {
             log.info("Workflow with name [{}] already exists in DB with ID [{}], updating.", oldWf.getName(), oldWf.getId());
+            wf.setId(oldWf.getId());
+            wf.setHeadRevision(oldWf.getHeadRevision());
+            wfVersion.setWorkflowID(wf.getId());
+            if(wfVersion.getVersionID() > 0 && wfVersion.getVersionID() != wf.getHeadRevision()) {
+                String errorMsg = String.format("Can only modify the head version '%s' but given version is '%s', so throwing error.", wf.getHeadRevision(), wfVersion.getVersionID());
+                IllegalStateException e = new IllegalStateException(errorMsg);
+                log.error(errorMsg, e);
+                throw e;
+            }
             return updateIntoDB(wf, wfVersion);
         }
     }
@@ -103,6 +115,7 @@ public class WorkflowService {
     @Transactional
     private Workflow insertIntoDB(Workflow wf, WorkflowVersion wfVersion) {
         Workflow newWf = workflowRepository.save(wf);
+        wfVersion.setWorkflowID(newWf.getId());
         WorkflowVersion newWfVersion = wfVersionRepository.save(wfVersion);
         newWf.setHeadRevision(newWfVersion.getVersionID());
         return newWf;
@@ -122,7 +135,9 @@ public class WorkflowService {
         if(!StringUtils.isEmpty(releaseWF.getWorkflowId())) {
             String[] ids = releaseWF.getWorkflowId().split(":");
             wf.setId(Long.parseLong(ids[0]));
-            workflowVersion.setVersionID(Long.parseLong(ids[1]));
+            if(ids.length == 2) {
+                workflowVersion.setVersionID(Long.parseLong(ids[1]));
+            }
         }
         return saveWorkFlow(wf, workflowVersion);
     }
