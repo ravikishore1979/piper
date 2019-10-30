@@ -93,7 +93,7 @@ public class DSL {
   public static final String MAP = "map";
   
   public static final String WEBHOOKS = "webhooks";
-  
+
   public static final String URL = "url";
   
   public static final String REQUIRED = "required";

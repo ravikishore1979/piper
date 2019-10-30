@@ -202,5 +202,5 @@ public class SimpleJob extends MapObject implements Job {
   public void setWebhooks (List<Accessor> aWebhooks) {
     set(DSL.WEBHOOKS,aWebhooks);
   }
-  
+
 }

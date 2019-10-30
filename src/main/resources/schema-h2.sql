@@ -47,6 +47,18 @@ create table if not exists pipelines (
     customerid varchar(50) not null,
     projectid varchar(50) not null,
     workflowname varchar(50) not null,
-    script text,
+    createdBy varchar(50),
+    createdTime datetime,
+    headRevision bigint;
     unique index name_ix (customerId, projectId, workflowname)
+) AUTO_INCREMENT = 10000;
+
+create table if not exists pipelineVersions (
+    versionID bigint primary key AUTO_INCREMENT,
+    workflowID bigint,
+    lastModified datetime,
+    lastModifiedBy varchar(50),
+    script text,
+    unique index name_ix (workflowID, versionID),
+    constraint pipeline_fk foreign key (workflowID) references pipelines(workflowid)
 ) AUTO_INCREMENT = 10000;

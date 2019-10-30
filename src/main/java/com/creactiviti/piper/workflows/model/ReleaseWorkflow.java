@@ -11,9 +11,10 @@ import java.util.List;
 @ToString
 public class ReleaseWorkflow {
 
-    private long workflowId;
+    private String workflowId;
     private String label;
     private List<WorkflowIO> inputs;
     private List<WorkflowIO> outputs;
     private List<WorkflowTask> tasks;
+
 }

@@ -36,5 +36,6 @@ public interface JobRepository {
   int countCompletedJobsToday ();
   
   int countCompletedJobsYesterday ();
-  
+
+  int countJobsByJobId(String s);
 }

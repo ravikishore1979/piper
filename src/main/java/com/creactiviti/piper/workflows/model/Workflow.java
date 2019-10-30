@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.util.Date;
+import java.util.List;
 
 
 @Entity
@@ -22,7 +24,9 @@ public class Workflow {
     private String projectId;
     @Column(name="workflowname")
     private String name;
-    @Column(name="script")
-    private String workflow;
+
+    private String createdBy;
+    private Date createdTime;
+    private long headRevision;
 }
 

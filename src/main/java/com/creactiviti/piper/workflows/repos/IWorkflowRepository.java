@@ -13,4 +13,8 @@ public interface IWorkflowRepository extends JpaRepository<Workflow, Long> {
     boolean existsByCustomerIdAndProjectIdAndName(String customerId, String projectId, String name);
 
     List<Workflow> findAllByCustomerIdAndProjectId(String customerID, String projectID);
+
+    boolean existsById(Long id);
+
+    Workflow findById(Long id);
 }

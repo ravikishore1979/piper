@@ -148,6 +148,11 @@ public class MongoJobRepository implements JobRepository {
                 lt(DSL.END_TIME, Date.from(today))));
   }
 
+  @Override
+  public int countJobsByJobId(String s) {
+    throw new IllegalStateException("Method not defined.");
+  }
+
 
   private BsonDocument jobToBsonDocument(Job aJob) {
     BsonDocument doc = new BsonDocument();

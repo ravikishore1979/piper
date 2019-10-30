@@ -166,4 +166,9 @@ public class JdbcJobRepository implements JobRepository {
     return (int)jdbc.queryForObject("select count(*) from job where status='COMPLETED' and end_time >= current_date-1 and end_time < current_date", Collections.EMPTY_MAP, Integer.class);
   }
 
+  @Override
+  public int countJobsByJobId(String jobId) {
+      return (int)jdbc.queryForObject("select count(*) from job where pipeline_id = :jobId", Collections.singletonMap("jobId", jobId), Integer.class);
+  }
+
 }
