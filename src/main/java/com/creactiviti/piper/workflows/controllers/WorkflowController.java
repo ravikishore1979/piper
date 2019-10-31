@@ -31,7 +31,7 @@ public class WorkflowController {
     public ResponseEntity<ReleaseWorkflow> getWorkflowByName(@PathVariable(name = "customerID") String customerID,
                                                       @PathVariable(name = "projectID") String projectID,
                                                       @PathVariable(name = "wfName") String workflowName,
-                                                             @RequestParam(name = "wfversion", defaultValue = "0L") Long versionId) {
+                                                             @RequestParam(name = "wfversion", defaultValue = "0") Long versionId) {
         ReleaseWorkflow pipelineByName = null;
         try {
             pipelineByName = workflowService.getPipelineByName(customerID, projectID, workflowName, versionId);

@@ -77,6 +77,10 @@ public class JdbcJobRepository implements JobRepository {
   @Override
   public Page<Job> findRecentJobs(int limit) {
     List<Job> items = jdbc.query(String.format("select * from job order by create_time desc limit %s", limit),this::jobRowMappper);
+    items.forEach(item -> {
+      SimpleJob job = (SimpleJob)item;
+      job.put("execution", null);
+    });
     ResultPage<Job> resultPage = new ResultPage<>(Job.class);
     resultPage.setItems(items);
     return resultPage;
