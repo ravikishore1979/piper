@@ -141,4 +141,10 @@ public interface Job extends Errorable, Prioritizable {
    */
   List<Accessor> getWebhooks ();
 
+  /**
+   * Returns the ID/Group/User who instantiated the cycle.
+   * @return
+   */
+  String getInstantiatedBy();
+
 }

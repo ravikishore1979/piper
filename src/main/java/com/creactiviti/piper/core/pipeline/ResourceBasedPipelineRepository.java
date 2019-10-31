@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.creactiviti.piper.core.MapObject;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
@@ -52,6 +53,11 @@ public class ResourceBasedPipelineRepository extends YamlPipelineRepository {
     catch(IOException e) {
       throw Throwables.propagate(e);
     }
+  }
+
+  @Override
+  public boolean validateInputForRun(MapObject jobParams) {
+    return true;
   }
 
   private Pipeline read (Resource aResource) {

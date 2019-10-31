@@ -198,7 +198,16 @@ public class SimpleJob extends MapObject implements Job {
   public List<Accessor> getWebhooks() {
     return getList(DSL.WEBHOOKS, MapObject.class, Collections.EMPTY_LIST);
   }
-  
+
+  @Override
+  public String getInstantiatedBy() {
+    return getString(DSL.INSTANTIATED_BY, null);
+  }
+
+  public void setInstantiatedBy(String userID) {
+    set(DSL.INSTANTIATED_BY, userID);
+  }
+
   public void setWebhooks (List<Accessor> aWebhooks) {
     set(DSL.WEBHOOKS,aWebhooks);
   }

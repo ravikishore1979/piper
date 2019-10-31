@@ -18,6 +18,7 @@ package com.creactiviti.piper.core.pipeline;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.creactiviti.piper.core.MapObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.Cache;
@@ -88,6 +89,14 @@ public class PipelineRepositoryChain implements PipelineRepository, Clearable {
                                            .collect(Collectors.toList());
     cache.put(CACHE_ALL, pipelines);
     return pipelines;
+  }
+
+  @Override
+  public boolean validateInputForRun(MapObject jobParams) {
+    for(PipelineRepository repository : repositories) {
+        repository.validateInputForRun(jobParams);
+    }
+    return true;
   }
 
   @Override

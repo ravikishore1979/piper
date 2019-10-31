@@ -12,7 +12,8 @@ create table if not exists job (
   inputs text not null,
   webhooks text not null,
   outputs text not null,
-  parent_task_execution_id varchar(256)
+  parent_task_execution_id varchar(256),
+  instantiated_by varchar(50)
 );
 
 create table if not exists task_execution  (

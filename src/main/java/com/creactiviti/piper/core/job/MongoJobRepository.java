@@ -153,6 +153,11 @@ public class MongoJobRepository implements JobRepository {
     throw new IllegalStateException("Method not defined.");
   }
 
+  @Override
+  public Page<Job> findJobsByWorkflowID(String wfID, int limit) {
+    throw new IllegalStateException("Method not defined.");
+  }
+
 
   private BsonDocument jobToBsonDocument(Job aJob) {
     BsonDocument doc = new BsonDocument();

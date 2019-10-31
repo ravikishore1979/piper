@@ -67,9 +67,10 @@ public class Coordinator {
   private TaskDispatcher taskDispatcher;
   private ErrorHandler errorHandler;
   private TaskCompletionHandler taskCompletionHandler;
-  private JobExecutor jobExecutor; 
+  private JobExecutor jobExecutor;
   private Messenger messenger;
-  
+
+  private static final String INSTANTIATED_BY = "instantiatedBy";
   private static final String PIPELINE_ID = "pipelineId";
   private static final String TAGS = "tags";
   private static final String INPUTS = "inputs";
@@ -90,7 +91,8 @@ public class Coordinator {
     Assert.notNull(aJobParams,"request can't be null");
     MapObject jobParams = MapObject.of(aJobParams);
     String pipelineId = jobParams.getRequiredString(PIPELINE_ID);
-    Pipeline pipeline = pipelineRepository.findOne(pipelineId);    
+    pipelineRepository.validateInputForRun(jobParams);
+    Pipeline pipeline = pipelineRepository.findOne(pipelineId);
     Assert.notNull(pipeline,String.format("Unkown pipeline: %s", pipelineId));
     Assert.isNull(pipeline.getError(), pipeline.getError()!=null?String.format("%s: %s",pipelineId,pipeline.getError().getMessage()):null);
 
@@ -111,6 +113,7 @@ public class Coordinator {
     job.setTags(tags!=null?tags.toArray(new String[tags.size()]):new String[0]);
     job.setWebhooks(webhooks!=null?webhooks:Collections.EMPTY_LIST);
     job.setInputs(inputs);
+    job.setInstantiatedBy(jobParams.getRequiredString(INSTANTIATED_BY));
     log.debug("Job {} started",job.getId());
     jobRepository.create(job);
     

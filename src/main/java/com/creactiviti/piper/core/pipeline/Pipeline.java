@@ -31,7 +31,7 @@ import com.creactiviti.piper.core.task.PipelineTask;
 public interface Pipeline extends Errorable {
 
   /**
-   * Returns the unique identifier of the pipeline. 
+   * Returns the unique identifier of the pipeline.
    */
   String getId ();
 

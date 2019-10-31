@@ -38,4 +38,6 @@ public interface JobRepository {
   int countCompletedJobsYesterday ();
 
   int countJobsByJobId(String s);
+
+    Page<Job> findJobsByWorkflowID(String wfID, int limit);
 }

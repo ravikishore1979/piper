@@ -103,7 +103,9 @@ public class DSL {
   public static final String OUTPUTS = "outputs";
   
   public static final String VALUE = "value";
-  
+
+  public static final String INSTANTIATED_BY = "instantiatedBy";
+
   public static final String[] RESERVED_WORDS = new String[]{
                                                               ID,
                                                               PARENT_ID,
@@ -119,7 +121,8 @@ public class DSL {
                                                               EXECUTION,
                                                               PRIORITY,
                                                               CURRENT_TASK,
-                                                              PARENT_TASK_EXECUTION_ID
+                                                              PARENT_TASK_EXECUTION_ID,
+                                                              INSTANTIATED_BY
                                                             }; 
   
 }

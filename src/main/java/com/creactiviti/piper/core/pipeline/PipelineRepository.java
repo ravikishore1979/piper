@@ -15,6 +15,8 @@
  */
 package com.creactiviti.piper.core.pipeline;
 
+import com.creactiviti.piper.core.MapObject;
+
 import java.util.List;
 
 
@@ -29,4 +31,5 @@ public interface PipelineRepository {
   
   List<Pipeline> findAll ();
 
+  boolean validateInputForRun(MapObject jobParams);
 }

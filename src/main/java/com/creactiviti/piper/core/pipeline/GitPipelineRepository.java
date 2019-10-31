@@ -18,6 +18,7 @@ package com.creactiviti.piper.core.pipeline;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.creactiviti.piper.core.MapObject;
 import com.creactiviti.piper.core.git.GitOperations;
 import com.creactiviti.piper.core.git.JGitTemplate;
 
@@ -38,6 +39,11 @@ public class GitPipelineRepository extends YamlPipelineRepository  {
                                           .collect(Collectors.toList());
       return pipelines;
     }
+  }
+
+  @Override
+  public boolean validateInputForRun(MapObject jobParams) {
+    return true;
   }
 
   @Override

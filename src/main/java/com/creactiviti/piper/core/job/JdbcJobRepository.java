@@ -76,11 +76,7 @@ public class JdbcJobRepository implements JobRepository {
 
   @Override
   public Page<Job> findRecentJobs(int limit) {
-    List<Job> items = jdbc.query(String.format("select * from job order by create_time desc limit %s", limit),this::jobRowMappper);
-    items.forEach(item -> {
-      SimpleJob job = (SimpleJob)item;
-      job.put("execution", null);
-    });
+    List<Job> items = jdbc.query(String.format("select * from job order by create_time desc limit %s", limit),this::jobRowMappperWithoutExecution);
     ResultPage<Job> resultPage = new ResultPage<>(Job.class);
     resultPage.setItems(items);
     return resultPage;
@@ -96,7 +92,7 @@ public class JdbcJobRepository implements JobRepository {
   @Override
   public void create (Job aJob) {
     MapSqlParameterSource sqlParameterSource = createSqlParameterSource(aJob);
-    jdbc.update("insert into job (id,create_time,start_time,status,current_task,pipeline_id,label,tags,priority,inputs,webhooks,outputs,parent_task_execution_id) values (:id,:createTime,:startTime,:status,:currentTask,:pipelineId,:label,:tags,:priority,:inputs,:webhooks,:outputs,:parentTaskExecutionId)", sqlParameterSource);
+    jdbc.update("insert into job (id,create_time,start_time,status,current_task,pipeline_id,label,tags,priority,inputs,webhooks,outputs,parent_task_execution_id,instantiated_by) values (:id,:createTime,:startTime,:status,:currentTask,:pipelineId,:label,:tags,:priority,:inputs,:webhooks,:outputs,:parentTaskExecutionId, :instantiated_by)", sqlParameterSource);
   }
 
   private MapSqlParameterSource createSqlParameterSource(Job aJob) {
@@ -120,6 +116,7 @@ public class JdbcJobRepository implements JobRepository {
     sqlParameterSource.addValue("outputs", JsonHelper.writeValueAsString(json,job.getOutputs()));
     sqlParameterSource.addValue("webhooks", JsonHelper.writeValueAsString(json,job.getWebhooks()));
     sqlParameterSource.addValue("parentTaskExecutionId", job.getParentTaskExecutionId());
+    sqlParameterSource.addValue("instantiated_by", job.getInstantiatedBy());
     return sqlParameterSource;
   }
   
@@ -132,26 +129,32 @@ public class JdbcJobRepository implements JobRepository {
   }
 
   private Job jobRowMappper (ResultSet aRs, int aIndex) throws SQLException {
-    Map<String, Object> map = new HashMap<>();
-    map.put("id", aRs.getString("id"));
-    map.put("status", aRs.getString("status"));
-    map.put("currentTask", aRs.getInt("current_task"));
-    map.put("pipelineId", aRs.getString("pipeline_id"));
-    map.put("label", aRs.getString("label"));
-    map.put("createTime", aRs.getTimestamp("create_time"));
-    map.put("startTime", aRs.getTimestamp("start_time"));
-    map.put("endTime", aRs.getTimestamp("end_time"));
-    map.put("execution", getExecution(aRs.getString("id")));
-    map.put("tags", aRs.getString("tags").length()>0?aRs.getString("tags").split(","):new String[0]);
-    map.put("priority", aRs.getInt("priority"));
-    map.put("inputs", JsonHelper.readValue(json,aRs.getString("inputs"),Map.class));
-    map.put("outputs", JsonHelper.readValue(json,aRs.getString("outputs"),Map.class));
-    map.put("webhooks", JsonHelper.readValue(json,aRs.getString("webhooks"),List.class));
-    map.put(DSL.PARENT_TASK_EXECUTION_ID, aRs.getString("parent_task_execution_id"));
-    return new SimpleJob(map);
+      Map<String, Object> map = getJobObjectMap(aRs);
+      map.put("execution", getExecution(aRs.getString("id")));
+      return new SimpleJob(map);
   }
-  
-  private List<TaskExecution> getExecution(String aJobId) {
+
+    private Map<String, Object> getJobObjectMap(ResultSet aRs) throws SQLException {
+        Map<String, Object> map = new HashMap<>();
+        map.put("id", aRs.getString("id"));
+        map.put("status", aRs.getString("status"));
+        map.put("currentTask", aRs.getInt("current_task"));
+        map.put("pipelineId", aRs.getString("pipeline_id"));
+        map.put(DSL.INSTANTIATED_BY, aRs.getString("instantiated_by"));
+        map.put("label", aRs.getString("label"));
+        map.put("createTime", aRs.getTimestamp("create_time"));
+        map.put("startTime", aRs.getTimestamp("start_time"));
+        map.put("endTime", aRs.getTimestamp("end_time"));
+        map.put("tags", aRs.getString("tags").length()>0?aRs.getString("tags").split(","):new String[0]);
+        map.put("priority", aRs.getInt("priority"));
+        map.put("inputs", JsonHelper.readValue(json,aRs.getString("inputs"),Map.class));
+        map.put("outputs", JsonHelper.readValue(json,aRs.getString("outputs"),Map.class));
+        map.put("webhooks", JsonHelper.readValue(json,aRs.getString("webhooks"), List.class));
+        map.put(DSL.PARENT_TASK_EXECUTION_ID, aRs.getString("parent_task_execution_id"));
+        return map;
+    }
+
+    private List<TaskExecution> getExecution(String aJobId) {
     return jobTaskRepository.getExecution(aJobId);
   }
 
@@ -174,5 +177,24 @@ public class JdbcJobRepository implements JobRepository {
   public int countJobsByJobId(String jobId) {
       return (int)jdbc.queryForObject("select count(*) from job where pipeline_id = :jobId", Collections.singletonMap("jobId", jobId), Integer.class);
   }
+
+  @Override
+  public Page<Job> findJobsByWorkflowID(String wfID, int limit) {
+    MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
+    sqlParameterSource.addValue("wfidlike", wfID+"%");
+    sqlParameterSource.addValue("limit", limit);
+
+    List<Job> items = jdbc.query("select * from job where pipeline_id like :wfidlike order by create_time desc limit :limit", sqlParameterSource, this::jobRowMappperWithoutExecution);
+
+    ResultPage<Job> resultPage = new ResultPage<>(Job.class);
+    resultPage.setItems(items);
+    return resultPage;
+  }
+
+    private <T> Job jobRowMappperWithoutExecution(ResultSet resultSet, int index) throws SQLException {
+        Map<String, Object> map = getJobObjectMap(resultSet);
+        return new SimpleJob(map);
+
+    }
 
 }
