@@ -16,7 +16,7 @@ import java.util.Map;
 
 @Slf4j
 @RestController
-@RequestMapping("tasks")
+@RequestMapping("/tasks")
 public class TasksController {
 
     @Autowired
