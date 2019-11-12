@@ -8,7 +8,6 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -20,7 +19,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @Slf4j
-public class ReleaseWorkflowTest {
+public class ReleaseWorkflowYamlTest {
 
     private static YAMLMapper yamlObjectMapper;
     private static ObjectMapper jsonObjectMapper;
@@ -72,37 +71,33 @@ public class ReleaseWorkflowTest {
 
     @Test
     void getWorkflowYaml() throws JsonProcessingException {
-        ReleaseWorkflow workflow = getReleaseWorkflow();
+        ReleasePipelineUI workflow = getReleaseWorkflow();
+        ReleaseWorkflowYaml yamlObj = workflow.getReleaseWorkflowYaml();
 
-        log.info("\n Yaml: \n" + yamlObjectMapper.writeValueAsString(workflow));
+        log.info("\n Yaml: \n" + yamlObjectMapper.writeValueAsString(yamlObj));
     }
 
     @Test
     void loadYamlString() throws IOException {
-        ReleaseWorkflow workflow = yamlObjectMapper.readValue(yamlString, ReleaseWorkflow.class);
+        ReleaseWorkflowYaml workflow = yamlObjectMapper.readValue(yamlString, ReleaseWorkflowYaml.class);
         assertNotNull(workflow);
         log.info("release Workflow Object: {}", workflow.toString());
     }
 
     @Test
     void getWorkflowJson() throws JsonProcessingException {
-        ReleaseWorkflow workflow = getReleaseWorkflow();
+        ReleasePipelineUI workflow = getReleaseWorkflow();
         log.info("\n JSON: \n {}", jsonObjectMapper.writeValueAsString(workflow));
     }
 
-    private ReleaseWorkflow getReleaseWorkflow() {
-        ReleaseWorkflow workflow = new ReleaseWorkflow();
+    private ReleasePipelineUI getReleaseWorkflow() {
+        ReleasePipelineUI workflow = new ReleasePipelineUI();
         workflow.setLabel("jsonToYaml");
-        WorkflowIO input = WorkflowIO.builder()
-                .variableName("name1")
-                .label("Release Workflow Label:")
-                .variableType("String")
-                .required(true)
-                .build();
-        WorkflowIO output = WorkflowIO.builder()
-                .variableName("magicNumer")
-                .value("${randomNumber}")
-                .build();
+
+        ReleasePipelineBuildInput rpbi = new ReleasePipelineBuildInput();
+        rpbi.setBuildPipelineBuildID("Latest");
+        rpbi.setBuildPipelineJobName("buildPipeLine1");
+        workflow.setReleasePipelineBuildInput(rpbi);
 
         List<WorkflowTask> tasks = new ArrayList<>();
         tasks.add(RandomInt.builder()
@@ -111,15 +106,31 @@ public class ReleaseWorkflowTest {
                 .startInclusive(0)
                 .endInclusive(5000)
                 .build());
-        tasks.add(PrintTask.builder()
-                .name("Stage2")
-                .label("Stage 2")
-                .text("Before Approval test test print ${name1}")
+        tasks.add(ApprovalTask.builder()
+                .name("precondition1")
+                .label("Pre Condition 1")
+                .taskCategory(TaskCategory.PRE_CONDITION)
+                .categoryFor("Approval1")
+                .assignedTo("user1@releaseowl.com")
+                .assignID("2334344")
+                .assignType(AssignType.USER)
+                .waitForMessage("preConditionMsg")
+                .build());
+        tasks.add(JenkinsJobTask.builder()
+                .name("QADeploy")
+                .label("Deploy to QA")
+                .waitForMessage("deployResponse")
+                .cfCredentialsID("334343e342sdfsdfsf2343")
                 .build());
         tasks.add(ApprovalTask.builder()
-                .name("Approval1")
-                .label("Approval1")
-                .waitForMessage("humanResponse")
+                .name("postCondition1")
+                .label("Post Condition 1")
+                .taskCategory(TaskCategory.POST_CONDITION)
+                .categoryFor("Approval2")
+                .assignedTo("user2@releaseowl.com")
+                .assignID("343453")
+                .assignType(AssignType.USER)
+                .waitForMessage("postConditionMsg")
                 .build());
         tasks.add(PrintTask.builder()
                 .name("Stage4")
@@ -127,8 +138,6 @@ public class ReleaseWorkflowTest {
                 .text("After Approval test print ${name1} with taskOutput Details ${approval1.msg} ==== ${approval1.subObj.k2}")
                 .build());
 
-        workflow.setInputs(Arrays.asList(input));
-        workflow.setOutputs(Arrays.asList(output));
         workflow.setTasks(tasks);
         return workflow;
     }

@@ -25,6 +25,6 @@ public class WorkflowSecurityConfigurer extends WebSecurityConfigurerAdapter {
                     .anyRequest().authenticated()
                 .and()
                     .httpBasic();
-
+        http.csrf().disable();
     }
 }

@@ -24,4 +24,6 @@ public class WorkflowVersion {
     private String lastModifiedBy;
     @Column(name="script")
     private String workflow;
+    @Column(name="buildinputjson")
+    private String buildInputJson;
 }

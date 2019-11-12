@@ -9,7 +9,7 @@ import java.util.List;
 @Getter
 @Setter
 @ToString
-public class ReleaseWorkflow {
+public class ReleaseWorkflowYaml {
 
     private String workflowId;
     private String label;

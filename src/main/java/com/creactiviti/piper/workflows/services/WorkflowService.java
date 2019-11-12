@@ -1,12 +1,11 @@
 package com.creactiviti.piper.workflows.services;
 
 import com.creactiviti.piper.core.job.JobRepository;
-import com.creactiviti.piper.workflows.model.WorkflowVersion;
-import com.creactiviti.piper.workflows.model.ReleaseWorkflow;
-import com.creactiviti.piper.workflows.model.Workflow;
+import com.creactiviti.piper.workflows.model.*;
 import com.creactiviti.piper.workflows.repos.IWorkflowRepository;
 import com.creactiviti.piper.workflows.repos.IWorkflowVersionRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
@@ -21,9 +20,7 @@ import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
 import java.io.IOException;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Service
 @Slf4j
@@ -36,23 +33,14 @@ public class WorkflowService {
     @Autowired
     private JobRepository jobRepository;
     private YAMLMapper yamlMapper;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @PostConstruct
     public void initBean() {
         yamlMapper = new YAMLMapper(new YAMLFactory());
         yamlMapper.configure(YAMLGenerator.Feature.USE_NATIVE_TYPE_ID, true);
         yamlMapper.configure(YAMLGenerator.Feature.WRITE_DOC_START_MARKER, false);
-    }
-
-    public ReleaseWorkflow getPipelineByName(String customerID, String projectID, String pipelineName, Long versionID) throws IOException {
-
-        Assert.noNullElements(new String[]{customerID, projectID, pipelineName}, "CustomerID, ProjectID and PipelineName cannot be empty");
-
-
-        Workflow wf = workflowRepository.findByCustomerIdAndProjectIdAndName(customerID, projectID, pipelineName);
-        Assert.notNull(wf, String.format("Workflow not found for %s, %s, %s", customerID, projectID, pipelineName));
-        ReleaseWorkflow rwf =  getWorkflowPOJO(wf, versionID);
-        return rwf;
     }
 
     public Workflow getPipelineByID(String pipelineID) {
@@ -62,6 +50,8 @@ public class WorkflowService {
         Assert.isTrue((id > 0), "Inavlid Pipeline ID " + pipelineID);
         return workflowRepository.findOne(id);
     }
+
+
 
     public Workflow saveWorkFlow(Workflow wf, WorkflowVersion wfVersion) {
         Workflow oldWf = null;
@@ -126,17 +116,26 @@ public class WorkflowService {
         return workflowRepository.save(newWf);
     }
 
-    public Workflow saveWorkflowWithPOJO(String customerID, String projectID, String workflowName, ReleaseWorkflow releaseWF) throws JsonProcessingException {
+    public Workflow saveWorkflowWithPOJO(String customerID, String projectID, String workflowName, ReleasePipelineUI releaseWF) throws JsonProcessingException {
         Workflow wf = new Workflow();
         wf.setCustomerId(customerID);
         wf.setProjectId(projectID);
         wf.setName(workflowName);
 
+        releaseWF.getTasks().forEach(task -> {
+            if(task instanceof JenkinsJobTask) {
+                JenkinsJobTask jenkinsJobTask = (JenkinsJobTask) task;
+                jenkinsJobTask.setBuildJobName(String.format("${%s}", ReleasePipelineUI.BUILD_JOB_NAME));
+                jenkinsJobTask.setBuildJobNumber(String.format("${%s}", ReleasePipelineUI.BUILD_NUMBER));
+            }
+        });
 
+        ReleaseWorkflowYaml rwfYaml = releaseWF.getReleaseWorkflowYaml();
         WorkflowVersion workflowVersion = new WorkflowVersion();
+        workflowVersion.setBuildInputJson(objectMapper.writeValueAsString(releaseWF.getReleasePipelineBuildInput()));
         workflowVersion.setLastModified(new Date());
         workflowVersion.setLastModifiedBy(null);
-        workflowVersion.setWorkflow(yamlMapper.writeValueAsString(releaseWF));
+        workflowVersion.setWorkflow(yamlMapper.writeValueAsString(rwfYaml));
         if(!StringUtils.isEmpty(releaseWF.getWorkflowId())) {
             String[] ids = releaseWF.getWorkflowId().split(":");
             wf.setId(Long.parseLong(ids[0]));
@@ -147,33 +146,26 @@ public class WorkflowService {
         return saveWorkFlow(wf, workflowVersion);
     }
 
-    public Map<String, ReleaseWorkflow> getAllPipelinesByProject(String customerID, String projectID) {
-
-        List<Workflow> workflowList = workflowRepository.findAllByCustomerIdAndProjectId(customerID, projectID);
-        Assert.notEmpty(workflowList, String.format("Unable to retrieve workflows for %s and %s", customerID, projectID));
-        Map<String, ReleaseWorkflow> workflowMap = new HashMap<>();
-        workflowList.forEach(wf -> {
-            ReleaseWorkflow rwf = getWorkflowPOJO(wf, -1L);
-            workflowMap.put(wf.getName(), rwf);
-        });
-
-        return workflowMap;
-    }
-
-    private ReleaseWorkflow getWorkflowPOJO(Workflow wf, long versionId) {
-        ReleaseWorkflow rwf = null;
+    private ReleasePipelineUI generateReleasePipelineUI(Workflow wf, long versionId) {
+        ReleasePipelineUI rpui = null;
         try {
             WorkflowVersion wfVersion = getWorkflow(wf, versionId);
             if(wfVersion == null) {
-                return rwf;
+                return rpui;
             }
-            rwf = yamlMapper.readValue(wfVersion.getWorkflow(), ReleaseWorkflow.class);
+            ReleaseWorkflowYaml rwfYaml = yamlMapper.readValue(wfVersion.getWorkflow(), ReleaseWorkflowYaml.class);
+            ReleasePipelineBuildInput rpbi = objectMapper.readValue(wfVersion.getBuildInputJson(), ReleasePipelineBuildInput.class);
             long requiredVersion =  (versionId > 0L) ?  versionId : wf.getHeadRevision();
-            rwf.setWorkflowId(wf.getId() + ":" + requiredVersion);
+            rwfYaml.setWorkflowId(wf.getId() + ":" + requiredVersion);
+            rpui = new ReleasePipelineUI();
+            rpui.setWorkflowId(rwfYaml.getWorkflowId());
+            rpui.setLabel(rwfYaml.getLabel());
+            rpui.setReleasePipelineBuildInput(rpbi);
+            rpui.setTasks(rwfYaml.getTasks());
         } catch (IOException e) {
             log.error("Unable to retrieve Workflow for customer '{}', project '{}', name '{}", wf.getCustomerId(), wf.getProjectId(), wf.getName(), e);
         }
-        return rwf;
+        return rpui;
     }
 
     private WorkflowVersion getWorkflow(Workflow wf, long versionId) {
@@ -211,4 +203,22 @@ public class WorkflowService {
 
         return workflowList;
     }
+
+    /**
+     * Returns the Release Pipeline UI Object that is required to render the Release Pipeline UI for editing.
+     * @param customerID
+     * @param projectID
+     * @param pipelineName
+     * @param versionID
+     * @return
+     */
+    public ReleasePipelineUI getPipelineUIByName(String customerID, String projectID, String pipelineName, Long versionID) {
+        Assert.noNullElements(new String[]{customerID, projectID, pipelineName}, "CustomerID, ProjectID and PipelineName cannot be empty");
+
+        Workflow wf = workflowRepository.findByCustomerIdAndProjectIdAndName(customerID, projectID, pipelineName);
+        Assert.notNull(wf, String.format("Workflow not found for %s, %s, %s", customerID, projectID, pipelineName));
+        ReleasePipelineUI rwf =  generateReleasePipelineUI(wf, versionID);
+        return rwf;
+    }
 }
+

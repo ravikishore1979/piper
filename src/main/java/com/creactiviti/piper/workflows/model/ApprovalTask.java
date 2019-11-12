@@ -16,7 +16,7 @@ public class ApprovalTask extends WorkflowTask{
     @Builder.Default
     private String type = "humanTask";
     @Builder.Default
-    private TaskCategory taskCategory = TaskCategory.DEFAULT;
+    private TaskCategory taskCategory = TaskCategory.TASK;
     private String categoryFor;
     /**
      *  ID of the User/group from user module;
@@ -28,4 +28,5 @@ public class ApprovalTask extends WorkflowTask{
     private String assignedTo;
     @Builder.Default
     private AssignType assignType=AssignType.USER;
+    private String message;
 }

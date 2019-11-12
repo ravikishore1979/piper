@@ -1,0 +1,51 @@
+workflowId: null
+label: "jsonToYaml"
+inputs:
+  - label: "Jenkins Build Name"
+    required: false
+    name: "BUILD_JOB_NAME"
+    type: "String"
+  - label: "Jenkins Build Number"
+    required: false
+    name: "BUILD_NUMBER"
+    type: "String"
+outputs: null
+tasks:
+  - !<randomInt>
+    name: "randomNumber"
+    label: "RandomInt Stage 1"
+    startInclusive: 0
+    endInclusive: 5000
+    type: "randomInt"
+  - !<humanTask>
+    name: "precondition1"
+    label: "Pre Condition 1"
+    type: "humanTask"
+    taskCategory: "PRE_CONDITION"
+    categoryFor: "QADeploy"
+    assignID: "2334344"
+    assignedTo: "user1@releaseowl.com"
+    assignType: "USER"
+    waitUntil: "preConditionMsg"
+  - !<deployTask>
+    name: "QADeploy"
+    label: "Deploy to QA"
+    jenkinsJobStatus: null
+    cfCredentialsID: "334343e342sdfsdfsf2343"
+    waitForMessage: "deployResponse"
+    type: "deployTask"
+  - !<humanTask>
+    name: "postCondition1"
+    label: "Post Condition 1"
+    type: "humanTask"
+    taskCategory: "POST_CONDITION"
+    categoryFor: "Approval2"
+    assignID: "343453"
+    assignedTo: "user2@releaseowl.com"
+    assignType: "USER"
+    waitUntil: "postConditionMsg"
+  - !<print>
+    name: "Stage4"
+    label: "Stage 4"
+    text: "After Approval test print ${name1} with taskOutput Details ${approval1.msg} ==== ${approval1.subObj.k2}"
+    type: "print"

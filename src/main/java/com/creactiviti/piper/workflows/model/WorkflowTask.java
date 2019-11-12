@@ -17,9 +17,11 @@ import lombok.experimental.SuperBuilder;
 @JsonSubTypes({
         @JsonSubTypes.Type(value = ApprovalTask.class, name = "humanTask"),
         @JsonSubTypes.Type(value = RandomInt.class, name = "randomInt"),
-        @JsonSubTypes.Type(value = PrintTask.class, name = "print")
+        @JsonSubTypes.Type(value = PrintTask.class, name = "print"),
+        @JsonSubTypes.Type(value = JenkinsJobTask.class, name = "deployTask")
 })
 public class WorkflowTask {
     private String name;
     private String label;
+    private String stageName;
 }

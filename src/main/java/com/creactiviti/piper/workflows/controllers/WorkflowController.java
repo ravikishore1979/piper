@@ -1,9 +1,8 @@
 package com.creactiviti.piper.workflows.controllers;
 
-import com.creactiviti.piper.workflows.exceptions.WorkflowException;
-import com.creactiviti.piper.workflows.model.WorkflowVersion;
-import com.creactiviti.piper.workflows.model.ReleaseWorkflow;
+import com.creactiviti.piper.workflows.model.ReleasePipelineUI;
 import com.creactiviti.piper.workflows.model.Workflow;
+import com.creactiviti.piper.workflows.model.WorkflowVersion;
 import com.creactiviti.piper.workflows.services.WorkflowService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +16,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @RestController
@@ -28,19 +26,13 @@ public class WorkflowController {
     private WorkflowService workflowService;
 
     @GetMapping(value = "/workflows/{customerID}/{projectID}/{wfName}", produces = "application/json")
-    public ResponseEntity<ReleaseWorkflow> getWorkflowByName(@PathVariable(name = "customerID") String customerID,
-                                                      @PathVariable(name = "projectID") String projectID,
-                                                      @PathVariable(name = "wfName") String workflowName,
-                                                             @RequestParam(name = "wfversion", defaultValue = "0") Long versionId) {
-        ReleaseWorkflow pipelineByName = null;
-        try {
-            pipelineByName = workflowService.getPipelineByName(customerID, projectID, workflowName, versionId);
-        } catch (IOException e) {
-            String errorMsg = String.format("Error while getting Workflow by %s, %s and %s", customerID, projectID, workflowName);
-            log.error(errorMsg, e);
-            throw new WorkflowException(errorMsg, e);
-        }
-        Assert.notNull(pipelineByName, "Unable to get Workflow object DB.");
+    public ResponseEntity<ReleasePipelineUI> getWorkflowByName(@PathVariable(name = "customerID") String customerID,
+                                                               @PathVariable(name = "projectID") String projectID,
+                                                               @PathVariable(name = "wfName") String workflowName,
+                                                               @RequestParam(name = "wfversion", defaultValue = "0") Long versionId) {
+        ReleasePipelineUI pipelineByName = workflowService.getPipelineUIByName(customerID, projectID, workflowName, versionId);
+
+        Assert.notNull(pipelineByName, String.format("Error while getting Workflow by %s, %s and %s", customerID, projectID, workflowName));
         return ResponseEntity.ok(pipelineByName);
     }
 
@@ -73,19 +65,20 @@ public class WorkflowController {
     }
 
     @PostMapping(value = "/workflows/{customerID}/{projectID}/{wfName}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<ReleaseWorkflow> saveWorkflowJson(@PathVariable(name = "customerID") String customerID,
-                                                   @PathVariable(name = "projectID") String projectID,
-                                                   @PathVariable(name = "wfName") String workflowName,
-                                                   @RequestBody ReleaseWorkflow workflow) throws IOException {
+    public ResponseEntity<Workflow> saveWorkflowJson(@PathVariable(name = "customerID") String customerID,
+                                                                @PathVariable(name = "projectID") String projectID,
+                                                                @PathVariable(name = "wfName") String workflowName,
+                                                                @RequestBody ReleasePipelineUI workflow) throws IOException {
         log.info("Received workflow [{}]", workflowName);
 
+        Workflow wf = null;
         try {
-            Workflow wf = workflowService.saveWorkflowWithPOJO(customerID, projectID, workflowName, workflow);
-            workflow.setWorkflowId(wf.getId()  + ":" + wf.getHeadRevision());
+            wf = workflowService.saveWorkflowWithPOJO(customerID, projectID, workflowName, workflow);
+            workflow.setWorkflowId(wf.getId() + ":" + wf.getHeadRevision());
         } catch (JsonProcessingException e) {
             log.error("Exception while parsing Workflow POJO {} [{}]", workflowName, workflow.toString(), e);
             throw e;
         }
-        return ResponseEntity.ok(workflow);
+        return ResponseEntity.ok(wf);
     }
 }

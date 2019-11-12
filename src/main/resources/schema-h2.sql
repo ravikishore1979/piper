@@ -57,6 +57,7 @@ create table if not exists pipelines (
 create table if not exists pipelineversions (
     versionid bigint primary key AUTO_INCREMENT,
     workflowid bigint,
+    buildinputjson text,
     lastmodified datetime,
     lastmodifiedby varchar(50),
     script text,
