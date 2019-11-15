@@ -14,7 +14,7 @@ import java.util.List;
 public class ReleasePipelineUI {
     public static final String BUILD_JOB_NAME = "buildJobName";
     public static final String BUILD_NUMBER = "buildNumber";
-
+    public static final String JENKINS_AUTH_TOKEN = "authToken";
 
     private String workflowId;
     private String label;

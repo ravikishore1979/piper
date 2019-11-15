@@ -1,6 +1,7 @@
 package com.creactiviti.piper.workflows.services;
 
 import com.creactiviti.piper.core.job.JobRepository;
+import com.creactiviti.piper.workflows.exceptions.WorkflowException;
 import com.creactiviti.piper.workflows.model.*;
 import com.creactiviti.piper.workflows.repos.IWorkflowRepository;
 import com.creactiviti.piper.workflows.repos.IWorkflowVersionRepository;
@@ -35,6 +36,8 @@ public class WorkflowService {
     private YAMLMapper yamlMapper;
     @Autowired
     private ObjectMapper objectMapper;
+    @Autowired
+    private SaparateClientService saparateClientService;
 
     @PostConstruct
     public void initBean() {
@@ -116,7 +119,7 @@ public class WorkflowService {
         return workflowRepository.save(newWf);
     }
 
-    public Workflow saveWorkflowWithPOJO(String customerID, String projectID, String workflowName, ReleasePipelineUI releaseWF) throws JsonProcessingException {
+    public Workflow saveWorkflowWithPOJO(String customerID, String projectID, String workflowName, ReleasePipelineUI releaseWF, String authToken) throws JsonProcessingException {
         Workflow wf = new Workflow();
         wf.setCustomerId(customerID);
         wf.setProjectId(projectID);
@@ -127,6 +130,7 @@ public class WorkflowService {
                 JenkinsJobTask jenkinsJobTask = (JenkinsJobTask) task;
                 jenkinsJobTask.setBuildJobName(String.format("${%s}", ReleasePipelineUI.BUILD_JOB_NAME));
                 jenkinsJobTask.setBuildJobNumber(String.format("${%s}", ReleasePipelineUI.BUILD_NUMBER));
+                jenkinsJobTask.setJenkinsAuthToken(String.format("${%s}", ReleasePipelineUI.JENKINS_AUTH_TOKEN));
             }
         });
 
@@ -143,7 +147,27 @@ public class WorkflowService {
                 workflowVersion.setVersionID(Long.parseLong(ids[1]));
             }
         }
-        return saveWorkFlow(wf, workflowVersion);
+        Workflow savedFlow = saveWorkFlow(wf, workflowVersion);
+
+        rwfYaml.getTasks().forEach(task -> {
+            if(task instanceof JenkinsJobTask) {
+                JenkinsJobTask jenkinsJobTask = (JenkinsJobTask) task;
+                String jenkinsDeployJobName = workflowName.concat("_" + jenkinsJobTask.getName())
+                        .concat("_"+savedFlow.getId())
+                        .concat("_"+savedFlow.getHeadRevision());
+                jenkinsJobTask.setJenkinsJobName(jenkinsDeployJobName);
+                try {
+                    String jenkinsDeployPipelineScript = jenkinsJobTask.getJenkinsJobCreateTemplateStr();
+                    saparateClientService.createOrUpdateJenkinsDeployJob(jenkinsDeployPipelineScript, authToken);
+                } catch (WorkflowException e) {
+                    log.error("Unable to create Jenkins Deploy job for {}", jenkinsDeployJobName, e);
+                }
+            }
+        });
+        workflowVersion.setWorkflow(yamlMapper.writeValueAsString(rwfYaml));
+        workflowVersion.setVersionID(savedFlow.getHeadRevision());
+        wfVersionRepository.save(workflowVersion);
+        return savedFlow;
     }
 
     private ReleasePipelineUI generateReleasePipelineUI(Workflow wf, long versionId) {
@@ -213,12 +237,15 @@ public class WorkflowService {
      * @return
      */
     public ReleasePipelineUI getPipelineUIByName(String customerID, String projectID, String pipelineName, Long versionID) {
-        Assert.noNullElements(new String[]{customerID, projectID, pipelineName}, "CustomerID, ProjectID and PipelineName cannot be empty");
-
-        Workflow wf = workflowRepository.findByCustomerIdAndProjectIdAndName(customerID, projectID, pipelineName);
+        Workflow wf = getWorkflow(customerID, projectID, pipelineName);
         Assert.notNull(wf, String.format("Workflow not found for %s, %s, %s", customerID, projectID, pipelineName));
         ReleasePipelineUI rwf =  generateReleasePipelineUI(wf, versionID);
         return rwf;
+    }
+
+    public Workflow getWorkflow(String customerID, String projectID, String pipelineName) {
+        Workflow wf = workflowRepository.findByCustomerIdAndProjectIdAndName(customerID, projectID, pipelineName);
+        return wf;
     }
 }
 

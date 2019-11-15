@@ -15,6 +15,7 @@ public class JenkinsJobTask extends WorkflowTask {
     @JsonIgnore
     private static String JENKINS_JOB_CREATE_TEMPLATE = "{\n" +
             "   \"jobName\":\"%s\",\n" +
+            "   \"clodfoundryId\":\"%s\",\n" +
             "   \"piperPipeline\":{\n" +
             "      \"stages\":[\n" +
             "         {\n" +
@@ -40,24 +41,24 @@ public class JenkinsJobTask extends WorkflowTask {
 
 
     private String jenkinsJobName;
-    private String jenkinsJobBuildID;
+    private String jenkinsBuildNumber;
 
     /**
      * This is runtime data.
      * Value will be set when this task started and a jenkins build is triggered.
      */
-    private String jenkinsJobStatus;
+    private String jenkinsBuildStatus;
     private String cfCredentialsID;
     private String waitForMessage;
     @Builder.Default
     private String type = "deployTask";
     private String buildJobName;
     private String buildJobNumber;
-
+    private String jenkinsAuthToken;
 
     @JsonIgnore
-    public String getJenkinsJobCreateTemplateStr(String jobName) {
-        return String.format(JENKINS_JOB_CREATE_TEMPLATE, jobName);
+    public String getJenkinsJobCreateTemplateStr() {
+        return String.format(JENKINS_JOB_CREATE_TEMPLATE, this.jenkinsJobName, this.cfCredentialsID);
     }
 
 }
