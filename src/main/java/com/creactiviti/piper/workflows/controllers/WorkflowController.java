@@ -22,7 +22,7 @@ import java.util.Map;
 
 @Slf4j
 @RestController
-@RequestMapping("/piper")
+@RequestMapping("/workflows")
 public class WorkflowController {
 
     @Autowired
@@ -31,7 +31,7 @@ public class WorkflowController {
     private Coordinator coordinator;
 
 
-    @GetMapping(value = "/workflows/{customerID}/{projectID}/{wfName}", produces = "application/json")
+    @GetMapping(value = "/{customerID}/{projectID}/{wfName}", produces = "application/json")
     public ResponseEntity<ReleasePipelineUI> getWorkflowByName(@PathVariable(name = "customerID") String customerID,
                                                                @PathVariable(name = "projectID") String projectID,
                                                                @PathVariable(name = "wfName") String workflowName,
@@ -44,7 +44,7 @@ public class WorkflowController {
         return ResponseEntity.ok(pipelineByName);
     }
 
-    @GetMapping(value = "/workflows/{customerID}/{projectID}", produces = "application/json")
+    @GetMapping(value = "/{customerID}/{projectID}", produces = "application/json")
     public ResponseEntity<List<Workflow>> getAllWorkflowsByProject(@PathVariable(name = "customerID") String customerID,
                                                                    @PathVariable(name = "projectID") String projectID) {
         return ResponseEntity.ok(workflowService.getAllWorkflowsByProject(customerID, projectID));
@@ -72,7 +72,7 @@ public class WorkflowController {
         return ResponseEntity.ok("SUccessfully saved.");
     }
 
-    @PostMapping(value = "/workflows/{customerID}/{projectID}/{wfName}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @PostMapping(value = "/{customerID}/{projectID}/{wfName}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<Workflow> saveWorkflowJson(@PathVariable(name = "customerID") String customerID,
                                     @PathVariable(name = "projectID") String projectID,
                                     @PathVariable(name = "wfName") String workflowName,
@@ -92,7 +92,7 @@ public class WorkflowController {
         return ResponseEntity.ok(wf);
     }
 
-    @PostMapping(value = "/workflows/trigger/{customerID}/{projectID}/{wfName}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @PostMapping(value = "/trigger/{customerID}/{projectID}/{wfName}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<Job> triggerWorkflow(@PathVariable(name = "customerID") String customerID,
                                                @PathVariable(name = "projectID") String projectID,
                                                @PathVariable(name = "wfName") String wfName,
@@ -102,6 +102,7 @@ public class WorkflowController {
         Assert.noNullElements(new String[]{customerID, projectID, wfName}, "CustomerID, ProjectID and PipelineName cannot be empty");
         log.info("Triggering Workflow {}", wfName);
         Workflow wf = workflowService.getWorkflow(customerID, projectID, wfName);
+        Assert.notNull(wf, String.format("Unable to find Workflow with wfName [%s]", wfName));
         jobInput.put("pipelineId", wf.getId() + ":" + wf.getHeadRevision());
         ((Map)jobInput.get("inputs")).put("authToken", authToken);
         Job releaseCycle = coordinator.create(jobInput);
