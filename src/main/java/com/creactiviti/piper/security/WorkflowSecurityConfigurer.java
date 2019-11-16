@@ -29,5 +29,6 @@ public class WorkflowSecurityConfigurer extends WebSecurityConfigurerAdapter {
                     .httpBasic();
 */
         http.csrf().disable();
+        http.cors();
     }
 }

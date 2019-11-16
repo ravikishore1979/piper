@@ -16,6 +16,7 @@ import java.util.Map;
 
 @Slf4j
 @RestController
+@CrossOrigin(value = "*")
 @RequestMapping("/tasks")
 public class TasksController {
 

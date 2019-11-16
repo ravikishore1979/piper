@@ -22,6 +22,7 @@ import java.util.Map;
 
 @Slf4j
 @RestController
+@CrossOrigin(value = "*")
 @RequestMapping("/workflows")
 public class WorkflowController {
 

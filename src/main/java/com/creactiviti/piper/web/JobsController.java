@@ -31,6 +31,7 @@ import java.util.Map;
 
 @RestController
 @ConditionalOnCoordinator
+@CrossOrigin(value = "*")
 @RequestMapping("/jobs")
 public class JobsController {
 

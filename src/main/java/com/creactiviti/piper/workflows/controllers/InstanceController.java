@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
+@CrossOrigin(value = "*")
 @RequestMapping("/release/instances")
 public class InstanceController {
 
