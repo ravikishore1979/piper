@@ -102,10 +102,12 @@ public class WorkflowController {
         Assert.notNull("Authorization token cannot be empty", authToken);
         Assert.noNullElements(new String[]{customerID, projectID, wfName}, "CustomerID, ProjectID and PipelineName cannot be empty");
         log.info("Triggering Workflow {}", wfName);
-        Workflow wf = workflowService.getWorkflow(customerID, projectID, wfName);
-        Assert.notNull(wf, String.format("Unable to find Workflow with wfName [%s]", wfName));
-        jobInput.put("pipelineId", wf.getId() + ":" + wf.getHeadRevision());
-        ((Map)jobInput.get("inputs")).put("authToken", authToken);
+        ReleasePipelineUI rpi = workflowService.getPipelineUIByName(customerID, projectID, wfName, -1L);
+        Assert.notNull(rpi, String.format("Unable to find Workflow with wfName [%s]", wfName));
+        jobInput.put("pipelineId", rpi.getWorkflowId());
+        Map inputs = (Map) jobInput.get("inputs");
+        inputs.put(ReleasePipelineUI.JENKINS_AUTH_TOKEN, authToken);
+        inputs.put(ReleasePipelineUI.BUILD_JOB_NAME, rpi.getReleasePipelineBuildInput().getBuildPipelineJobName());
         Job releaseCycle = coordinator.create(jobInput);
         return ResponseEntity.ok(releaseCycle);
     }

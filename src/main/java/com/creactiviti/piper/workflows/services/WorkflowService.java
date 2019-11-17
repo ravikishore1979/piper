@@ -173,7 +173,7 @@ public class WorkflowService {
     private ReleasePipelineUI generateReleasePipelineUI(Workflow wf, long versionId) {
         ReleasePipelineUI rpui = null;
         try {
-            WorkflowVersion wfVersion = getWorkflow(wf, versionId);
+            WorkflowVersion wfVersion = getWorkflowVersion(wf, versionId);
             if(wfVersion == null) {
                 return rpui;
             }
@@ -192,7 +192,7 @@ public class WorkflowService {
         return rpui;
     }
 
-    private WorkflowVersion getWorkflow(Workflow wf, long versionId) {
+    private WorkflowVersion getWorkflowVersion(Workflow wf, long versionId) {
         long requiredVersion =  (versionId > 0L) ?  versionId : wf.getHeadRevision();
         WorkflowVersion wfVersion = wfVersionRepository.findOne(requiredVersion);
         log.info("Unable to find Workflow yaml with ID %s", requiredVersion);
