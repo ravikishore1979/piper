@@ -5,6 +5,7 @@ import com.creactiviti.piper.core.job.Job;
 import com.creactiviti.piper.workflows.model.ReleasePipelineUI;
 import com.creactiviti.piper.workflows.model.Workflow;
 import com.creactiviti.piper.workflows.model.WorkflowVersion;
+import com.creactiviti.piper.workflows.model.WorkflowWithInput;
 import com.creactiviti.piper.workflows.services.WorkflowService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
@@ -46,8 +47,8 @@ public class WorkflowController {
     }
 
     @GetMapping(value = "/{customerID}/{projectID}", produces = "application/json")
-    public ResponseEntity<List<Workflow>> getAllWorkflowsByProject(@PathVariable(name = "customerID") String customerID,
-                                                                   @PathVariable(name = "projectID") String projectID) {
+    public ResponseEntity<List<WorkflowWithInput>> getAllWorkflowsByProject(@PathVariable(name = "customerID") String customerID,
+                                                                            @PathVariable(name = "projectID") String projectID) {
         return ResponseEntity.ok(workflowService.getAllWorkflowsByProject(customerID, projectID));
     }
 

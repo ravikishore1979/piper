@@ -5,6 +5,7 @@ import com.creactiviti.piper.workflows.exceptions.WorkflowException;
 import com.creactiviti.piper.workflows.model.*;
 import com.creactiviti.piper.workflows.repos.IWorkflowRepository;
 import com.creactiviti.piper.workflows.repos.IWorkflowVersionRepository;
+import com.creactiviti.piper.workflows.repos.WorkflowJdbcRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -38,6 +39,9 @@ public class WorkflowService {
     private ObjectMapper objectMapper;
     @Autowired
     private SaparateClientService saparateClientService;
+
+    @Autowired
+    private WorkflowJdbcRepository workflowJdbcRepository;
 
     @PostConstruct
     public void initBean() {
@@ -221,8 +225,8 @@ public class WorkflowService {
         return new String[]{(wf.getId() + ":" + requiredVersion), wfVersion.getWorkflow()};
     }
 
-    public List<Workflow> getAllWorkflowsByProject(String customerID, String projectID) {
-        List<Workflow> workflowList = workflowRepository.findAllByCustomerIdAndProjectId(customerID, projectID);
+    public List<WorkflowWithInput> getAllWorkflowsByProject(String customerID, String projectID) {
+        List<WorkflowWithInput> workflowList = workflowJdbcRepository.findAllByCustomerIdAndProjectId(customerID, projectID);
         Assert.notEmpty(workflowList, String.format("Unable to retrieve workflows for %s and %s", customerID, projectID));
 
         return workflowList;
