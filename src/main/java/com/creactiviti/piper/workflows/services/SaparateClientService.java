@@ -1,6 +1,7 @@
 package com.creactiviti.piper.workflows.services;
 
 import com.creactiviti.piper.workflows.exceptions.WorkflowException;
+import com.creactiviti.piper.workflows.model.JenkinsJobTask;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -47,11 +48,11 @@ public class SaparateClientService implements InitializingBean {
         }
     }
 
-    public String triggerJenkinsDeployJob(String jobName, String authToken) {
+    public String triggerJenkinsDeployJob(String jobName, String authToken, String buildPipelineName, String buildPipelineBuildNumber) {
         JsonNode inputJson = null;
         String buildNumber = null;
         try {
-            inputJson = objectMapper.readTree(String.format("{\"jobName\":\"%s\"}", jobName));
+            inputJson = objectMapper.readTree(String.format(JenkinsJobTask.JENKINS_TRIGGER_DEPLOY_JOB, jobName, buildPipelineName, buildPipelineBuildNumber));
             HttpHeaders headers = new HttpHeaders();
             headers.set("Authorization", authToken);
             HttpEntity<JsonNode> httpEntity = new HttpEntity<>(inputJson, headers);

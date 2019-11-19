@@ -29,7 +29,7 @@ public class DeployTask extends Wait {
         log.info("Deploying the task [{}]", aTask);
         Map<String, Object> outputMap = new HashMap<>();
         String deployJobName = aTask.getRequiredString(JOB_NAME);
-        String buildNumber = saparateClientService.triggerJenkinsDeployJob(deployJobName, aTask.getRequiredString(JENKINS_AUTH_TOKEN));
+        String buildNumber = saparateClientService.triggerJenkinsDeployJob(deployJobName, aTask.getRequiredString(JENKINS_AUTH_TOKEN), aTask.getRequiredString(BUILD_PIPELINE_NAME), aTask.getRequiredString(BUILD_PIPELINE_BUILD_NUMBER));
         if(aTask instanceof SimplePipelineTask) {
             SimplePipelineTask pipelineTask = (SimplePipelineTask) aTask;
             pipelineTask.put(BUILD_NUMBER, buildNumber);
@@ -45,6 +45,8 @@ public class DeployTask extends Wait {
         String BUILD_NUMBER = "jenkinsBuildNumber";
         String BUILD_STATUS = "jenkinsBuildStatus";
         String JENKINS_AUTH_TOKEN = "jenkinsAuthToken";
+        String BUILD_PIPELINE_NAME = "buildJobName";
+        String BUILD_PIPELINE_BUILD_NUMBER = "buildJobNumber";
     }
 }
 

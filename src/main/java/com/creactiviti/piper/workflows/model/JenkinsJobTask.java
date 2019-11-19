@@ -39,6 +39,12 @@ public class JenkinsJobTask extends WorkflowTask {
             "   }\n" +
             "}";
 
+    @JsonIgnore
+    public static String JENKINS_TRIGGER_DEPLOY_JOB = "{\n" +
+            "\"jobName\":\"%s\",\n" +
+            "\"buildPipelineJobName\":\"%s\",\n" +
+            "\"buildPipelineBuildNumber\":\"%s\"\n" +
+            "}";
 
     private String jenkinsJobName;
     private String jenkinsBuildNumber;
