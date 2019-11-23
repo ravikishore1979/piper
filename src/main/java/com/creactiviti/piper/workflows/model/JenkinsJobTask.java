@@ -16,34 +16,56 @@ public class JenkinsJobTask extends WorkflowTask {
     private static String JENKINS_JOB_CREATE_TEMPLATE = "{\n" +
             "   \"jobName\":\"%s\",\n" +
             "   \"clodfoundryId\":\"%s\",\n" +
-            "   \"piperPipeline\":{\n" +
-            "      \"stages\":[\n" +
-            "         {\n" +
-            "            \"name\":\"Deploy\",\n" +
-            "            \"statementList\":[\n" +
-            "                {\n" +
-            "                  \"type\":\"gst\",\n" +
-            "                  \"statment\":\"writeFile file:'.pipeline/config.yaml', text: \\\"${params.configyaml}\\\"\"\n" +
-            "               },\n" +
-            "                {\n" +
-            "                  \"type\":\"gst\",\n" +
-            "                  \"statment\":\"setupCommonPipelineEnvironment script:this\"\n" +
-            "               },\n" +
-            "               {\n" +
-            "                  \"type\":\"gst\",\n" +
-            "                  \"statment\":\"cloudFoundryDeploy script: this\"\n" +
-            "               }\n" +
-            "            ]\n" +
-            "         }\n" +
-            "      ]\n" +
-            "   }\n" +
+            "   \"piperPipeline\": {\n" +
+            "  \"stages\" : [ {\n" +
+            "    \"name\" : \"Deploy\",\n" +
+            "    \"surroundWithTryCatch\" : true,\n" +
+            "    \"statementList\" : [ {\n" +
+            "      \"type\" : \"gst\",\n" +
+            "      \"statment\" : \"writeFile file:'.pipeline/config.yaml', text: \\\"${params.configyaml}\\\"\"\n" +
+            "    }, {\n" +
+            "      \"type\" : \"gst\",\n" +
+            "      \"statment\" : \"cloudFoundryDeploy script: this\"\n" +
+            "    } ]\n" +
+            "  }, {\n" +
+            "    \"name\" : \"Webhook\",\n" +
+            "    \"surroundWithTryCatch\" : false,\n" +
+            "    \"statementList\" : [ {\n" +
+            "      \"type\" : \"gst\",\n" +
+            "      \"statment\" : \"if(buildFailed) {\\n            currentBuild.result = 'FAILURE'\\n        } else {\\n            currentBuild.result = 'SUCCESS'\\n        }\"\n" +
+            "    }, {\n" +
+            "      \"type\" : \"gst\",\n" +
+            "      \"statment\" : \"echo \\\"Error Msg: ${errorMsg}\\\"\"\n" +
+            "    }, {\n" +
+            "      \"type\" : \"gst\",\n" +
+            "      \"statment\" : \"echo 'Current Build Status: ' + currentBuild.result\"\n" +
+            "    }, {\n" +
+            "      \"type\" : \"gst\",\n" +
+            "      \"statment\" : \"echo 'Build Number: ' + currentBuild.number\"\n" +
+            "    }, {\n" +
+            "      \"type\" : \"gst\",\n" +
+            "      \"statment\" : \"echo \\\"Env-FLOW_TASK_ID: ${env.RATE_FLOW_TASK_ID}\\\"\"\n" +
+            "    }, {\n" +
+            "      \"type\" : \"gst\",\n" +
+            "      \"statment\" : \"def inputMsg = '{ \\\"humanResponse\\\": { \\\"buildNumber\\\" : ' + currentBuild.number + ', \\\"buildStatus\\\" : \\\"' + currentBuild.result + '\\\", \\\"errorMsg\\\" : \\\"' + errorMsg + '\\\" } }'\"\n" +
+            "    }, {\n" +
+            "      \"type\" : \"gst\",\n" +
+            "      \"statment\" : \"httpRequest acceptType: 'APPLICATION_JSON', consoleLogResponseBody: true, contentType: 'APPLICATION_JSON', customHeaders: [[maskValue: false, name: 'Authorization', value: \\\"${params.RATE_AUTH_TOKEN}\\\"]], httpMode: 'PUT', requestBody: \\\"${inputMsg}\\\", responseHandle: 'NONE', timeout: 120, url: params.RATE_URL +'/tasks/' + params.RATE_FLOW_TASK_ID + '?action=COMPLETE', validResponseCodes: '100:599'\"\n" +
+            "    } ]\n" +
+            "  } ]\n" +
+            "}"+
             "}";
 
     @JsonIgnore
     public static String JENKINS_TRIGGER_DEPLOY_JOB = "{\n" +
             "\"jobName\":\"%s\",\n" +
             "\"buildPipelineJobName\":\"%s\",\n" +
-            "\"buildPipelineBuildNumber\":\"%s\"\n" +
+            "\"buildPipelineBuildNumber\":\"%s\",\n" +
+            "\"triggerInputParams\" : {\n" +
+                "\"RATE_AUTH_TOKEN\":\"%s\",\n" +
+                "\"RATE_URL\":\"%s\",\n" +
+                "\"RATE_FLOW_TASK_ID\":\"%s\"\n" +
+                "}" +
             "}";
 
     private String jenkinsJobName;

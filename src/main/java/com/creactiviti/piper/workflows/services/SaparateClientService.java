@@ -26,6 +26,8 @@ public class SaparateClientService implements InitializingBean {
 
     @Value("${saparate.rest.url}")
     private String saparateUrl;
+    @Value("${workflow.rest.url}")
+    private String workflowUrl;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -48,11 +50,11 @@ public class SaparateClientService implements InitializingBean {
         }
     }
 
-    public String triggerJenkinsDeployJob(String jobName, String authToken, String buildPipelineName, String buildPipelineBuildNumber) {
+    public String triggerJenkinsDeployJob(String jobName, String authToken, String buildPipelineName, String buildPipelineBuildNumber, String taskInstanceId) {
         JsonNode inputJson = null;
         String buildNumber = null;
         try {
-            inputJson = objectMapper.readTree(String.format(JenkinsJobTask.JENKINS_TRIGGER_DEPLOY_JOB, jobName, buildPipelineName, buildPipelineBuildNumber));
+            inputJson = objectMapper.readTree(String.format(JenkinsJobTask.JENKINS_TRIGGER_DEPLOY_JOB, jobName, buildPipelineName, buildPipelineBuildNumber, authToken, workflowUrl, taskInstanceId));
             HttpHeaders headers = new HttpHeaders();
             headers.set("Authorization", authToken);
             HttpEntity<JsonNode> httpEntity = new HttpEntity<>(inputJson, headers);
