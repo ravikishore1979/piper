@@ -33,8 +33,10 @@ public class TasksController {
                 log.error(ex.getMessage(), ex);
                 throw ex;
             }
-            case COMPLETE: {
-                return coordinator.completeTaskAndResumeJob(taskId, taskOutput);
+            case COMPLETE:
+            case APPROVE:
+            case REJECT: {
+                return coordinator.handleTaskActionAndResumeJob(taskId, taskOutput, action);
             }
             default: {
                 throw new IllegalArgumentException(String.format("Invalid action [%s] for task [%s]", action, taskId));

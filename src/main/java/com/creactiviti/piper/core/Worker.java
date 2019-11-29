@@ -156,7 +156,6 @@ public class Worker {
         completion.setEndTime(new Date());
         completion.setExecutionTime(System.currentTimeMillis()-startTime);
 
-          completion.setStatus(TaskStatus.COMPLETED);
           messenger.send(Queues.COMPLETIONS, completion);
       }
       catch (InterruptedException e) {

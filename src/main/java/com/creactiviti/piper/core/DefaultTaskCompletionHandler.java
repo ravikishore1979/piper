@@ -18,6 +18,7 @@ package com.creactiviti.piper.core;
 import java.util.Date;
 import java.util.List;
 
+import com.creactiviti.piper.core.task.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,12 +34,6 @@ import com.creactiviti.piper.core.job.JobStatus;
 import com.creactiviti.piper.core.job.SimpleJob;
 import com.creactiviti.piper.core.pipeline.Pipeline;
 import com.creactiviti.piper.core.pipeline.PipelineRepository;
-import com.creactiviti.piper.core.task.SimpleTaskExecution;
-import com.creactiviti.piper.core.task.SpelTaskEvaluator;
-import com.creactiviti.piper.core.task.TaskEvaluator;
-import com.creactiviti.piper.core.task.TaskExecution;
-import com.creactiviti.piper.core.task.TaskExecutionRepository;
-import com.creactiviti.piper.core.task.TaskStatus;
 
 
 /**
@@ -63,23 +58,14 @@ public class DefaultTaskCompletionHandler implements TaskCompletionHandler {
     log.debug("Completing task {}", aTask.getId());
     Job job = jobRepository.findJobByTaskId (aTask.getId());
     if(job!=null) {
-      SimpleTaskExecution task = SimpleTaskExecution.createForUpdate(aTask);
-      task.setStatus(TaskStatus.COMPLETED);
-      jobTaskRepository.merge(task);
-      SimpleJob mjob = new SimpleJob (job);
-      if(task.getOutput() != null && task.getName() != null) {
-        Context context = contextRepository.peek(job.getId());
-        MapContext newContext = new MapContext(context.asMap());
-        newContext.put(task.getName(), task.getOutput());
-        contextRepository.push(job.getId(), newContext);
-      }
-      if(hasMoreTasks(mjob)) {
-        mjob.setCurrentTask(mjob.getCurrentTask()+1);
-        jobRepository.merge(mjob);
-        jobExecutor.execute(mjob);
-      }
-      else {
-        complete(mjob);
+      switch (TaskActions.valueOf(aTask.get("taskAction"))) {
+        case APPROVE:
+        case COMPLETE:
+          handleTaskCompletion(aTask, job);
+          break;
+        case REJECT:
+          handleTaskReject(aTask, job);
+          break;
       }
     }
     else {
@@ -87,12 +73,58 @@ public class DefaultTaskCompletionHandler implements TaskCompletionHandler {
     }
   }
 
-    @Override
+  private void handleTaskReject(TaskExecution aTask, Job job) {
+    SimpleTaskExecution task = SimpleTaskExecution.createForUpdate(aTask);
+    task.setStatus(TaskStatus.CANCELLED);
+    jobTaskRepository.merge(task);
+    SimpleJob mjob = new SimpleJob (job);
+    if(task.getOutput() != null && task.getName() != null) {
+      Context context = contextRepository.peek(job.getId());
+      MapContext newContext = new MapContext(context.asMap());
+      newContext.put(task.getName(), task.getOutput());
+      contextRepository.push(job.getId(), newContext);
+    }
+    suspend(mjob);
+  }
+
+  private void suspend(SimpleJob aJob) {
+    SimpleJob job = new SimpleJob((Job)aJob);
+    job.setStatus(JobStatus.STOPPED);
+    job.setEndTime(new Date ());
+    jobRepository.merge(job);
+    eventPublisher.publishEvent(PiperEvent.of(Events.JOB_STATUS, "jobId", aJob.getId(), "status", job.getStatus()));
+    log.info("Job {} suspended/stopped successfully",aJob.getId());
+  }
+
+  private void handleTaskCompletion(TaskExecution aTask, Job job) {
+    SimpleTaskExecution task = SimpleTaskExecution.createForUpdate(aTask);
+    task.setStatus(TaskStatus.COMPLETED);
+    jobTaskRepository.merge(task);
+    SimpleJob mjob = new SimpleJob (job);
+    if(task.getOutput() != null && task.getName() != null) {
+      Context context = contextRepository.peek(job.getId());
+      MapContext newContext = new MapContext(context.asMap());
+      newContext.put(task.getName(), task.getOutput());
+      contextRepository.push(job.getId(), newContext);
+    }
+    if(hasMoreTasks(mjob)) {
+      mjob.setCurrentTask(mjob.getCurrentTask()+1);
+      jobRepository.merge(mjob);
+      jobExecutor.execute(mjob);
+    }
+    else {
+      complete(mjob);
+    }
+  }
+
+  @Override
     public void handleWaitingState(TaskExecution aTask) {
         log.debug("Waiting task {}", aTask.getId());
         Job job = jobRepository.findJobByTaskId (aTask.getId());
         if(job!=null) {
             SimpleTaskExecution task = SimpleTaskExecution.createForUpdate(aTask);
+            task.setStatus(TaskStatus.WAITING);
+            jobTaskRepository.merge(task);
             SimpleJob mjob = new SimpleJob (job);
             wait(mjob);
         }
@@ -123,7 +155,7 @@ public class DefaultTaskCompletionHandler implements TaskCompletionHandler {
     job.setOutputs(evaledjobOutput);
     jobRepository.merge(job);
     eventPublisher.publishEvent(PiperEvent.of(Events.JOB_STATUS, "jobId", aJob.getId(), "status", job.getStatus()));
-    log.debug("Job {} completed successfully",aJob.getId());
+    log.info("Job {} completed successfully",aJob.getId());
   }
 
   private void wait (SimpleJob aJob) {

@@ -20,6 +20,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import com.creactiviti.piper.core.task.*;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,12 +43,6 @@ import com.creactiviti.piper.core.messenger.Messenger;
 import com.creactiviti.piper.core.messenger.Queues;
 import com.creactiviti.piper.core.pipeline.Pipeline;
 import com.creactiviti.piper.core.pipeline.PipelineRepository;
-import com.creactiviti.piper.core.task.CancelTask;
-import com.creactiviti.piper.core.task.SimpleTaskExecution;
-import com.creactiviti.piper.core.task.TaskDispatcher;
-import com.creactiviti.piper.core.task.TaskExecution;
-import com.creactiviti.piper.core.task.TaskExecutionRepository;
-import com.creactiviti.piper.core.task.TaskStatus;
 import com.creactiviti.piper.core.uuid.UUIDGenerator;
 
 /**
@@ -207,9 +202,10 @@ public class Coordinator {
    *          The id of the Task to complete.
    * @param taskOutput
    *          A Map that should be used as the output of the Task.
+   * @param action
    * @return The resumed job
    */
-  public Job completeTaskAndResumeJob(String taskId, Map<String, Object> taskOutput) {
+  public Job handleTaskActionAndResumeJob(String taskId, Map<String, Object> taskOutput, TaskActions action) {
 
     log.debug("Completing Task {}", taskId);
     TaskExecution taskExecution = jobTaskRepository.findOne(taskId);
@@ -226,6 +222,7 @@ public class Coordinator {
     //TODO: Explore a way to avoid below type casting.
     SimpleTaskExecution stask = (SimpleTaskExecution) taskExecution;
     stask.set("taskCompleteInput", taskOutput);
+    stask.set("taskAction", action);
     messenger.send(Queues.RUN_WAITING_TASKS, stask);
     return mjob;
   }

@@ -205,6 +205,46 @@
 					</execution>
 				</executions>
 			</plugin>-->
+			<plugin>
+				<groupId>org.apache.tomcat.maven</groupId>
+				<artifactId>tomcat8-maven-plugin</artifactId>
+				<version>3.0-r1756463</version>
+				<!--<configuration>
+					<url>http:// localhost:8080/manager/text</url>
+					<server>TomcatServer</server>    *(From maven > settings.xml)*
+					<username>*yourtomcatusername*</username>
+					<password>*yourtomcatpassword*</password>
+				</configuration>-->
+			</plugin>
 		</plugins>
 	</build>
+	<pluginRepositories>
+		<pluginRepository>
+			<id>alfresco-public-release</id>
+			<url>https://artifacts.alfresco.com/nexus/content/repositories/public/</url>
+		</pluginRepository>
+	</pluginRepositories>
+	<profiles>
+		<profile>
+			<id>local</id>
+			<properties>
+				<activatedProperties>local</activatedProperties>
+			</properties>
+			<!--<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>-->
+		</profile>
+		<profile>
+			<id>dev</id>
+			<properties>
+				<activatedProperties>dev</activatedProperties>
+			</properties>
+		</profile>
+		<profile>
+			<id>demo</id>
+			<properties>
+				<activatedProperties>demo</activatedProperties>
+			</properties>
+		</profile>
+	</profiles>
 </project>
