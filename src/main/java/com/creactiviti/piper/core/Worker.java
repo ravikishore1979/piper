@@ -86,7 +86,8 @@ public class Worker {
             completion.setOutput(output);
           }
         }
-
+        //This is required to set if COMPLETION/WAITING is handled by DefaultTaskCompletionHandler before the above START event listener.
+        completion.setStartTime(new Date(startTime));
         completion.setProgress(100);
         completion.setEndTime(new Date());
         completion.setExecutionTime(System.currentTimeMillis()-startTime);
@@ -95,6 +96,7 @@ public class Worker {
           messenger.send(Queues.WAITING, completion);
           eventPublisher.publishEvent(PiperEvent.of(Events.TASK_WAIT, "taskId", aTask.getId(), "jobId", aTask.getJobId()));
         } else {
+          completion.set("taskAction", TaskActions.COMPLETE);
           completion.setStatus(TaskStatus.COMPLETED);
           messenger.send(Queues.COMPLETIONS, completion);
         }
