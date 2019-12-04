@@ -22,7 +22,7 @@ public class JenkinsJobTask extends WorkflowTask {
             "    \"surroundWithTryCatch\" : true,\n" +
             "    \"statementList\" : [ {\n" +
             "      \"type\" : \"gst\",\n" +
-            "      \"statment\" : \" sh '''\\n        rm -rf ${JENKINS_HOME}/workspace/${JOB_NAME}/*.mtar\\n        mkdir -p ${JENKINS_HOME}/workspace/${JOB_NAME}\\n        cp -a /var/jenkins_home/workspace/QA_Build/9/*.mtar \\\"${JENKINS_HOME}/workspace/${JOB_NAME}\\\"\\n        '''\"\n" +
+            "      \"statment\" : \" sh '''\\n        rm -rf ${JENKINS_HOME}/workspace/${JOB_NAME}/*\\n        mkdir -p ${JENKINS_HOME}/workspace/${JOB_NAME}\\n        cp -ra /var/jenkins_home/workspace/${params.BUILD_JOB_NAME}/${params.BUILD_JOB_NUMBER}/* \\\"${JENKINS_HOME}/workspace/${JOB_NAME}\\\"\\n        '''\"\n" +
             "    }, {\n" +
             "      \"type\" : \"gst\",\n" +
             "      \"statment\" : \"writeFile file:'.pipeline/config.yaml', text: \\\"${params.configyaml}\\\"\"\n" +
@@ -47,7 +47,7 @@ public class JenkinsJobTask extends WorkflowTask {
             "      \"statment\" : \"echo 'Build Number: ' + currentBuild.number\"\n" +
             "    }, {\n" +
             "      \"type\" : \"gst\",\n" +
-            "      \"statment\" : \"echo \\\"Env-FLOW_TASK_ID: ${env.RATE_FLOW_TASK_ID}\\\"\"\n" +
+            "      \"statment\" : \"echo \\\"Env-FLOW_TASK_ID: ${params.RATE_FLOW_TASK_ID}\\\"\"\n" +
             "    }, {\n" +
             "      \"type\" : \"gst\",\n" +
             "      \"statment\" : \"def inputMsg = '{ \\\"humanResponse\\\": { \\\"buildNumber\\\" : ' + currentBuild.number + ', \\\"buildStatus\\\" : \\\"' + currentBuild.result + '\\\", \\\"errorMsg\\\" : \\\"' + errorMsg + '\\\" } }'\"\n" +
@@ -65,6 +65,8 @@ public class JenkinsJobTask extends WorkflowTask {
             "\"buildPipelineJobName\":\"%s\",\n" +
             "\"buildPipelineBuildNumber\":\"%s\",\n" +
             "\"triggerInputParams\" : {\n" +
+                "\"BUILD_JOB_NAME\":\"%s\",\n" +
+                "\"BUILD_JOB_NUMBER\":\"%s\",\n" +
                 "\"RATE_AUTH_TOKEN\":\"%s\",\n" +
                 "\"RATE_URL\":\"%s\",\n" +
                 "\"RATE_FLOW_TASK_ID\":\"%s\"\n" +

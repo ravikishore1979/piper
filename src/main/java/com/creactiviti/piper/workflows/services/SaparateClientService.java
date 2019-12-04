@@ -54,7 +54,7 @@ public class SaparateClientService implements InitializingBean {
         JsonNode inputJson = null;
         String buildNumber = null;
         try {
-            inputJson = objectMapper.readTree(String.format(JenkinsJobTask.JENKINS_TRIGGER_DEPLOY_JOB, jobName, buildPipelineName, buildPipelineBuildNumber, authToken, workflowUrl, taskInstanceId));
+            inputJson = objectMapper.readTree(String.format(JenkinsJobTask.JENKINS_TRIGGER_DEPLOY_JOB, jobName, buildPipelineName, buildPipelineBuildNumber, buildPipelineName, buildPipelineBuildNumber, authToken, workflowUrl, taskInstanceId));
             HttpHeaders headers = new HttpHeaders();
             headers.set("Authorization", authToken);
             HttpEntity<JsonNode> httpEntity = new HttpEntity<>(inputJson, headers);
