@@ -22,7 +22,7 @@ public class JenkinsJobTask extends WorkflowTask {
             "    \"surroundWithTryCatch\" : true,\n" +
             "    \"statementList\" : [ {\n" +
             "      \"type\" : \"gst\",\n" +
-            "      \"statment\" : \" sh '''\\n        rm -rf ${JENKINS_HOME}/workspace/${JOB_NAME}/*\\n        mkdir -p ${JENKINS_HOME}/workspace/${JOB_NAME}\\n        cp -ra /var/jenkins_home/workspace/${params.BUILD_JOB_NAME}/${params.BUILD_JOB_NUMBER}/* \\\"${JENKINS_HOME}/workspace/${JOB_NAME}\\\"\\n        '''\"\n" +
+            "      \"statment\" : \" sh '''\\n        rm -rf ${JENKINS_HOME}/workspace/${JOB_NAME}/*\\n        mkdir -p ${JENKINS_HOME}/workspace/${JOB_NAME}\\n        cp -ra \\\"${JENKINS_HOME}/workspace/${BUILD_JOB_NAME}/${BUILD_JOB_NUMBER}/.\\\"  \\\"${JENKINS_HOME}/workspace/${JOB_NAME}/\\\"\\n        '''\"\n" +
             "    }, {\n" +
             "      \"type\" : \"gst\",\n" +
             "      \"statment\" : \"writeFile file:'.pipeline/config.yaml', text: \\\"${params.configyaml}\\\"\"\n" +
