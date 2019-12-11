@@ -27,6 +27,9 @@ public class JenkinsJobTask extends WorkflowTask {
             "      \"type\" : \"gst\",\n" +
             "      \"statment\" : \"writeFile file:'.pipeline/config.yaml', text: \\\"${params.configyaml}\\\"\"\n" +
             "    }, {\n" +
+            "       \"type\":\"gst\",\n" +
+            "       \"statement\":\"setupCommonPipelineEnvironment script:this\"\n" +
+            "    }, {\n" +
             "      \"type\" : \"gst\",\n" +
             "      \"statment\" : \"cloudFoundryDeploy script: this\"\n" +
             "    } ]\n" +
