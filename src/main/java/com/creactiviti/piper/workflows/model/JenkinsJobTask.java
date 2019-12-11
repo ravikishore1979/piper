@@ -15,6 +15,7 @@ public class JenkinsJobTask extends WorkflowTask {
     @JsonIgnore
     private static String JENKINS_JOB_CREATE_TEMPLATE = "{\n" +
             "   \"jobName\":\"%s\",\n" +
+            "   \"jobType\":\"deploy\",\n" +
             "   \"clodfoundryId\":\"%s\",\n" +
             "   \"piperPipeline\": {\n" +
             "  \"stages\" : [ {\n" +
@@ -28,7 +29,7 @@ public class JenkinsJobTask extends WorkflowTask {
             "      \"statment\" : \"writeFile file:'.pipeline/config.yaml', text: \\\"${params.configyaml}\\\"\"\n" +
             "    }, {\n" +
             "       \"type\":\"gst\",\n" +
-            "       \"statement\":\"setupCommonPipelineEnvironment script:this\"\n" +
+            "       \"statment\":\"setupCommonPipelineEnvironment script:this\"\n" +
             "    }, {\n" +
             "      \"type\" : \"gst\",\n" +
             "      \"statment\" : \"cloudFoundryDeploy script: this\"\n" +
