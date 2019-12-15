@@ -1,0 +1,12 @@
+{
+  "jobName": "%s",
+  "buildPipelineJobName": "%s",
+  "buildPipelineBuildNumber": "%s",
+  "triggerInputParams": {
+    "BUILD_JOB_NAME": "%s",
+    "BUILD_JOB_NUMBER": "%s",
+    "RATE_AUTH_TOKEN": "%s",
+    "RATE_URL": "%s",
+    "RATE_FLOW_TASK_ID": "%s"
+  }
+}

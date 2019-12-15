@@ -1,81 +1,38 @@
 package com.creactiviti.piper.workflows.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.databind.JsonNode;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.ClassPathResource;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 
 @Getter
 @Setter
 @ToString
 @NoArgsConstructor
 @SuperBuilder
+@Slf4j
 public class JenkinsJobTask extends WorkflowTask {
 
     @JsonIgnore
-    private static String JENKINS_JOB_CREATE_TEMPLATE = "{\n" +
-            "   \"jobName\":\"%s\",\n" +
-            "   \"jobType\":\"deploy\",\n" +
-            "   \"clodfoundryId\":\"%s\",\n" +
-            "   \"piperPipeline\": {\n" +
-            "  \"stages\" : [ {\n" +
-            "    \"name\" : \"Deploy\",\n" +
-            "    \"surroundWithTryCatch\" : true,\n" +
-            "    \"statementList\" : [ {\n" +
-            "      \"type\" : \"gst\",\n" +
-            "      \"statment\" : \" sh \\\"cp -ra \\\\\\\"${JENKINS_HOME}/workspace/${params.BUILD_JOB_NAME}/${params.BUILD_JOB_NUMBER}/.\\\\\\\"  \\\\\\\"${JENKINS_HOME}/workspace/${JOB_NAME}/\\\\\\\"\\\"\"\n" +
-            "    }, {\n" +
-            "      \"type\" : \"gst\",\n" +
-            "      \"statment\" : \"writeFile file:'.pipeline/config.yaml', text: \\\"${params.configyaml}\\\"\"\n" +
-            "    }, {\n" +
-            "       \"type\":\"gst\",\n" +
-            "       \"statment\":\"setupCommonPipelineEnvironment script:this\"\n" +
-            "    }, {\n" +
-            "      \"type\" : \"gst\",\n" +
-            "      \"statment\" : \"cloudFoundryDeploy script: this\"\n" +
-            "    } ]\n" +
-            "  }, {\n" +
-            "    \"name\" : \"Webhook\",\n" +
-            "    \"surroundWithTryCatch\" : false,\n" +
-            "    \"statementList\" : [ {\n" +
-            "      \"type\" : \"gst\",\n" +
-            "      \"statment\" : \"if(buildFailed) {\\n            currentBuild.result = 'FAILURE'\\n        } else {\\n            currentBuild.result = 'SUCCESS'\\n        }\"\n" +
-            "    }, {\n" +
-            "      \"type\" : \"gst\",\n" +
-            "      \"statment\" : \"echo \\\"Error Msg: ${errorMsg}\\\"\"\n" +
-            "    }, {\n" +
-            "      \"type\" : \"gst\",\n" +
-            "      \"statment\" : \"echo 'Current Build Status: ' + currentBuild.result\"\n" +
-            "    }, {\n" +
-            "      \"type\" : \"gst\",\n" +
-            "      \"statment\" : \"echo 'Build Number: ' + currentBuild.number\"\n" +
-            "    }, {\n" +
-            "      \"type\" : \"gst\",\n" +
-            "      \"statment\" : \"echo \\\"Env-FLOW_TASK_ID: ${params.RATE_FLOW_TASK_ID}\\\"\"\n" +
-            "    }, {\n" +
-            "      \"type\" : \"gst\",\n" +
-            "      \"statment\" : \"def inputMsg = '{ \\\"humanResponse\\\": { \\\"buildNumber\\\" : ' + currentBuild.number + ', \\\"buildStatus\\\" : \\\"' + currentBuild.result + '\\\", \\\"errorMsg\\\" : \\\"' + errorMsg + '\\\" } }'\"\n" +
-            "    }, {\n" +
-            "      \"type\" : \"gst\",\n" +
-            "      \"statment\" : \"httpRequest acceptType: 'APPLICATION_JSON', consoleLogResponseBody: true, contentType: 'APPLICATION_JSON', customHeaders: [[maskValue: false, name: 'Authorization', value: \\\"${params.RATE_AUTH_TOKEN}\\\"]], httpMode: 'PUT', requestBody: \\\"${inputMsg}\\\", responseHandle: 'NONE', timeout: 120, url: params.RATE_URL +'/tasks/' + params.RATE_FLOW_TASK_ID + '?action=COMPLETE', validResponseCodes: '100:599'\"\n" +
-            "    } ]\n" +
-            "  } ]\n" +
-            "}"+
-            "}";
+    private static String JENKINS_JOB_CREATE_TEMPLATE;
 
     @JsonIgnore
-    public static String JENKINS_TRIGGER_DEPLOY_JOB = "{\n" +
-            "\"jobName\":\"%s\",\n" +
-            "\"buildPipelineJobName\":\"%s\",\n" +
-            "\"buildPipelineBuildNumber\":\"%s\",\n" +
-            "\"triggerInputParams\" : {\n" +
-                "\"BUILD_JOB_NAME\":\"%s\",\n" +
-                "\"BUILD_JOB_NUMBER\":\"%s\",\n" +
-                "\"RATE_AUTH_TOKEN\":\"%s\",\n" +
-                "\"RATE_URL\":\"%s\",\n" +
-                "\"RATE_FLOW_TASK_ID\":\"%s\"\n" +
-                "}" +
-            "}";
+    public static String JENKINS_TRIGGER_DEPLOY_JOB;
+    static {
+        try {
+            File createJobFile = new ClassPathResource("jenkinsJobCreateTemplate.json").getFile();
+            File triggerFile = new ClassPathResource("jenkinsTriggerDeployJob.json").getFile();
+            JENKINS_JOB_CREATE_TEMPLATE = new String(Files.readAllBytes(createJobFile.toPath()));
+            JENKINS_TRIGGER_DEPLOY_JOB = new String(Files.readAllBytes(triggerFile.toPath()));
+        } catch (IOException e) {
+            log.error("Error reading the template JSON [jenkinsJobCreateTemplate.json] or [jenkinsTriggerDeployJob.json]", e);
+        }
+    }
 
     private String jenkinsJobName;
     private String jenkinsBuildNumber;

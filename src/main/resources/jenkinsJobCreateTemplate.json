@@ -1,0 +1,48 @@
+{
+  "jobName":"%s",
+  "jobType":"deploy",
+  "clodfoundryId":"%s",
+  "piperPipeline": {
+    "stages" : [ {
+      "name" : "Deploy",
+      "surroundWithTryCatch" : true,
+      "statementList" : [ {
+        "type" : "gst",
+        "statment" : " sh \"cp -ra \\\"${JENKINS_HOME}/workspace/${params.BUILD_JOB_NAME}/${params.BUILD_JOB_NUMBER}/.\\\"  \\\"${JENKINS_HOME}/workspace/${JOB_NAME}/\\\"\""
+      }, {
+        "type" : "gst",
+        "statment" : "writeFile file:'.pipeline/config.yaml', text: \"${params.configyaml}\""
+      }, {
+        "type":"gst",
+        "statment":"setupCommonPipelineEnvironment script:this"
+      }, {
+        "type" : "gst",
+        "statment" : "cloudFoundryDeploy script: this"
+      } ]
+    }, {
+      "name" : "Webhook",
+      "surroundWithTryCatch" : false,
+      "statementList" : [ {
+        "type" : "gst",
+        "statment" : "if(buildFailed) {\n            currentBuild.result = 'FAILURE'\n        } else {\n            currentBuild.result = 'SUCCESS'\n        }"
+      }, {
+        "type" : "gst",
+        "statment" : "echo \"Error Msg: ${errorMsg}\""
+      }, {
+        "type" : "gst",
+        "statment" : "echo 'Current Build Status: ' + currentBuild.result"
+      }, {
+        "type" : "gst",
+        "statment" : "echo 'Build Number: ' + currentBuild.number"
+      }, {
+        "type" : "gst",
+        "statment" : "echo \"Env-FLOW_TASK_ID: ${params.RATE_FLOW_TASK_ID}\""
+      }, {
+        "type" : "gst",
+        "statment" : "def inputMsg = '{ \"humanResponse\": { \"buildNumber\" : ' + currentBuild.number + ', \"buildStatus\" : \"' + currentBuild.result + '\", \"errorMsg\" : \"' + errorMsg + '\" } }'"
+      }, {
+        "type" : "gst",
+        "statment" : "httpRequest acceptType: 'APPLICATION_JSON', consoleLogResponseBody: true, contentType: 'APPLICATION_JSON', customHeaders: [[maskValue: false, name: 'Authorization', value: \"${params.RATE_AUTH_TOKEN}\"]], httpMode: 'PUT', requestBody: \"${inputMsg}\", responseHandle: 'NONE', timeout: 120, url: params.RATE_URL +'/tasks/' + params.RATE_FLOW_TASK_ID + '?action=COMPLETE', validResponseCodes: '100:599'"
+      } ]
+    } ]
+  }}
