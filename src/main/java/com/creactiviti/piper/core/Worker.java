@@ -94,7 +94,8 @@ public class Worker {
         if(taskHandler instanceof Wait) {
           completion.setStatus(TaskStatus.WAITING);
           messenger.send(Queues.WAITING, completion);
-          eventPublisher.publishEvent(PiperEvent.of(Events.TASK_WAIT, "taskId", aTask.getId(), "jobId", aTask.getJobId()));
+          //TODO: Currently commenting this as changes done in completion are not updated in DB and causing flow execution issues.
+//          eventPublisher.publishEvent(PiperEvent.of(Events.TASK_WAIT, "taskId", aTask.getId(), "jobId", aTask.getJobId()));
         } else {
           completion.set("taskAction", TaskActions.COMPLETE);
           completion.setStatus(TaskStatus.COMPLETED);
@@ -139,37 +140,39 @@ public class Worker {
     Future<?> future = executors.submit(() -> {
       try {
         long startTime = aTask.getStartTime().getTime();
-        logger.debug("Received Waiting task: {}",aTask);
+        logger.debug("Received Waiting task: {}", aTask);
         TaskHandler<?> taskHandler = taskHandlerResolver.resolve(aTask);
-        TaskEventHandler<?> eventHandler = (TaskEventHandler<?>)taskHandler;
-        Object output = eventHandler.hanldeEvent(aTask);
+        TaskEventHandler<?> eventHandler = (TaskEventHandler<?>) taskHandler;
+        Object output = eventHandler.handleEvent(aTask);
         SimpleTaskExecution completion = SimpleTaskExecution.createForUpdate(aTask);
-        if(output!=null) {
-          if(completion.getOutput() != null) {
-            TaskExecution evaluated = taskEvaluator.evaluate(completion, new MapContext ("execution", new MapContext("output", output)));
-            completion = SimpleTaskExecution.createForUpdate(evaluated);
-          }
-          else {
-            completion.setOutput(output);
-          }
-        }
 
-        completion.setProgress(100);
-        completion.setEndTime(new Date());
-        completion.setExecutionTime(System.currentTimeMillis()-startTime);
+        if (aTask.getStatus() == TaskStatus.WAITING) {
+          eventPublisher.publishEvent(PiperEvent.of(Events.TASK_WAIT, "taskId", aTask.getId(), "jobId", aTask.getJobId()));
+          messenger.send(Queues.WAITING, completion);
+        } else {
+          if (output != null) {
+            if (completion.getOutput() != null) {
+              TaskExecution evaluated = taskEvaluator.evaluate(completion, new MapContext("execution", new MapContext("output", output)));
+              completion = SimpleTaskExecution.createForUpdate(evaluated);
+            } else {
+              completion.setOutput(output);
+            }
+          }
+
+          completion.setProgress(100);
+          completion.setEndTime(new Date());
+          completion.setExecutionTime(System.currentTimeMillis() - startTime);
 
           messenger.send(Queues.COMPLETIONS, completion);
-      }
-      catch (InterruptedException e) {
+        }
+      } catch (InterruptedException e) {
         // ignore
-      }
-      catch (Exception e) {
+      } catch (Exception e) {
         Future<?> myFuture = taskExecutions.get(aTask.getId());
-        if(!myFuture.isCancelled()) {
+        if (!myFuture.isCancelled()) {
           handleException(aTask, e);
         }
-      }
-      finally {
+      } finally {
         taskExecutions.remove(aTask.getId());
       }
     });
@@ -180,8 +183,7 @@ public class Worker {
       future.get(calculateTimeout(aTask), TimeUnit.MILLISECONDS);
     } catch (InterruptedException | ExecutionException | TimeoutException e) {
       handleException(aTask, e);
-    }
-    catch (CancellationException e) {
+    } catch (CancellationException e) {
       logger.debug("Cancelled Waiting task: {}", aTask.getId());
     }
 

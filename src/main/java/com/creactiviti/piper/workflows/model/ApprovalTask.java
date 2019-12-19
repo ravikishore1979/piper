@@ -14,7 +14,7 @@ public class ApprovalTask extends WorkflowTask{
     @JsonProperty("waitUntil")
     private String waitForMessage;
     @Builder.Default
-    private String type = "humanTask";
+    private String type = "approvalTask";
     @Builder.Default
     private TaskCategory taskCategory = TaskCategory.TASK;
     private String categoryFor;

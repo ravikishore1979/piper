@@ -221,8 +221,10 @@ public class Coordinator {
 
     //TODO: Explore a way to avoid below type casting.
     SimpleTaskExecution stask = (SimpleTaskExecution) taskExecution;
-    stask.set("taskCompleteInput", taskOutput);
-    stask.set("taskAction", action);
+    stask.set(DSL.TASK_ACTION_INPUT, taskOutput);
+    stask.set(DSL.TASK_ACTION, action);
+    //TODO: This is temporary, acted by should be read from user context object when user context is implemented.
+    stask.set(DSL.ACTED_BY, taskOutput.get(DSL.ACTED_BY));
     messenger.send(Queues.RUN_WAITING_TASKS, stask);
     return mjob;
   }

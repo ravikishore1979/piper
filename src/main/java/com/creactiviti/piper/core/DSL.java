@@ -101,10 +101,24 @@ public class DSL {
   public static final String EVENT = "event";
   
   public static final String OUTPUTS = "outputs";
-  
+
   public static final String VALUE = "value";
 
   public static final String INSTANTIATED_BY = "instantiatedBy";
+
+  public static final String TASK_ACTION_INPUT = "taskCompleteInput";
+
+  public static final String TASK_ACTION = "taskAction";
+
+  public static final String ASSIGNEE_ID = "assignID";
+
+  public static final String ASSIGNEE_TO = "assignedTo";
+
+  public static final String ASSIGNEE_TYPE = "assignType";
+
+  public static final String HUMAN_TASK_ID = "humanTaskID";
+
+  public static final String ACTED_BY = "actedBy";
 
   public static final String[] RESERVED_WORDS = new String[]{
                                                               ID,
@@ -122,7 +136,7 @@ public class DSL {
                                                               PRIORITY,
                                                               CURRENT_TASK,
                                                               PARENT_TASK_EXECUTION_ID,
-                                                              INSTANTIATED_BY
+                                                              TASK_ACTION
                                                             };
 
 }

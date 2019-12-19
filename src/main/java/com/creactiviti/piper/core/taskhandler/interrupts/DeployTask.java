@@ -1,5 +1,6 @@
 package com.creactiviti.piper.core.taskhandler.interrupts;
 
+import com.creactiviti.piper.core.DSL;
 import com.creactiviti.piper.core.task.SimplePipelineTask;
 import com.creactiviti.piper.core.task.SimpleTaskExecution;
 import com.creactiviti.piper.core.task.Task;
@@ -22,8 +23,8 @@ public class DeployTask extends Wait {
     private SaparateClientService saparateClientService;
 
     @Override
-    public Object hanldeEvent(Task task) throws Exception {
-        Map<String, Object> taskCompleteInput = task.get("taskCompleteInput");
+    public Object handleEvent(Task task) throws Exception {
+        Map<String, Object> taskCompleteInput = task.get(DSL.TASK_ACTION_INPUT, Map.class);
         Object taskOutput = taskCompleteInput.get("humanResponse");
         Assert.notNull(taskOutput, "Task Input does not have an object with key [humanResponse]");
         Map<String, Object> jenkinsResponse = (Map<String, Object>) taskOutput;

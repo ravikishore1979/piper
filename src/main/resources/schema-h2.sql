@@ -65,23 +65,29 @@ create table if not exists pipelineversions (
     constraint pipeline_fk foreign key (workflowid) references pipelines(workflowid)
 ) AUTO_INCREMENT = 10000;
 
---create table if not exists humantaskassignee {
---    id bigint primary key AUTO_INCREMENT,
---    taskinstanceid varchar(256) not null,
---    assigneeid varchar(50) not null,
---    assigneetype varchar(15) not null default user,
---    assigneename varchar(50),
---    index assignee_ix(assigneeid),
---    constraint taskinstance_fk foreign key(taskinstanceid) references task_execution(id)
---};
---
---create table if not exists humantaskactions {
---    id bigint primary key AUTO_INCREMENT,
---    assigneeid bigint,
---    taskinstanceid varchar(256),
---    actionname varchar(10),
---    actiondoneby varchar(50),
---    actiondate datetime
---    constraint taskinstance_fk foreign key(taskinstanceid) references task_execution(id),
---    constraint assignee_fk foreign key(assigneeid) references humantaskassignee(id)
---};
+create table if not exists humantaskassignee (
+    id bigint primary key AUTO_INCREMENT,
+    taskinstanceid varchar(256) not null,
+    assigneeid varchar(50) not null,
+    assigneetype varchar(15) not null,
+    assigneename varchar(50),
+    assigndate datetime,
+    businesslogicid varchar(10),
+    index assignee_ix(assigneeid),
+    index taskinstance_fk(taskinstanceid),
+    foreign key(taskinstanceid) references task_execution(id)
+) AUTO_INCREMENT = 10000;
+
+create table if not exists humantaskaction (
+    id bigint primary key AUTO_INCREMENT,
+    humantaskid bigint,
+    taskinstanceid varchar(256),
+    actionname varchar(10),
+    actiondoneby varchar(50),
+    actiondate datetime,
+    errormsg varchar(1000),
+    index taskinstance_fk(taskinstanceid),
+    index assignee_fk(humantaskid),
+    foreign key(taskinstanceid) references task_execution(id),
+    foreign key(humantaskid) references humantaskassignee(id)
+) AUTO_INCREMENT = 10000;

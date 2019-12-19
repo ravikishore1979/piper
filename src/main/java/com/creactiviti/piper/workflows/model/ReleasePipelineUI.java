@@ -18,6 +18,7 @@ public class ReleasePipelineUI {
 
     private String workflowId;
     private String label;
+    private String createdBy;
     private ReleasePipelineBuildInput releasePipelineBuildInput;
     private List<WorkflowTask> tasks;
 

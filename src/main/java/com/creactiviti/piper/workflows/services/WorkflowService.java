@@ -128,6 +128,8 @@ public class WorkflowService {
         wf.setCustomerId(customerID);
         wf.setProjectId(projectID);
         wf.setName(workflowName);
+        wf.setCreatedBy(releaseWF.getCreatedBy());
+        wf.setCreatedTime(new Date());
 
         releaseWF.getTasks().forEach(task -> {
             if(task instanceof JenkinsJobTask) {
@@ -179,6 +181,7 @@ public class WorkflowService {
         try {
             WorkflowVersion wfVersion = getWorkflowVersion(wf, versionId);
             if(wfVersion == null) {
+                log.warn("Unable to find Workflow yaml with ID {}", versionId);
                 return rpui;
             }
             ReleaseWorkflowYaml rwfYaml = yamlMapper.readValue(wfVersion.getWorkflow(), ReleaseWorkflowYaml.class);
@@ -199,7 +202,6 @@ public class WorkflowService {
     private WorkflowVersion getWorkflowVersion(Workflow wf, long versionId) {
         long requiredVersion =  (versionId > 0L) ?  versionId : wf.getHeadRevision();
         WorkflowVersion wfVersion = wfVersionRepository.findOne(requiredVersion);
-        log.info("Unable to find Workflow yaml with ID %s", requiredVersion);
         return wfVersion;
     }
 

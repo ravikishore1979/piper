@@ -2,10 +2,7 @@ package com.creactiviti.piper.workflows.controllers;
 
 import com.creactiviti.piper.core.Coordinator;
 import com.creactiviti.piper.core.job.Job;
-import com.creactiviti.piper.workflows.model.ReleasePipelineUI;
-import com.creactiviti.piper.workflows.model.Workflow;
-import com.creactiviti.piper.workflows.model.WorkflowVersion;
-import com.creactiviti.piper.workflows.model.WorkflowWithInput;
+import com.creactiviti.piper.workflows.model.*;
 import com.creactiviti.piper.workflows.services.WorkflowService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
@@ -31,7 +28,6 @@ public class WorkflowController {
     private WorkflowService workflowService;
     @Autowired
     private Coordinator coordinator;
-
 
     @GetMapping(value = "/{customerID}/{projectID}/{wfName}", produces = "application/json")
     public ResponseEntity<ReleasePipelineUI> getWorkflowByName(@PathVariable(name = "customerID") String customerID,
