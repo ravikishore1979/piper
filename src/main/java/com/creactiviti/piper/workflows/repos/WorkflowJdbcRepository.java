@@ -1,5 +1,6 @@
 package com.creactiviti.piper.workflows.repos;
 
+import com.creactiviti.piper.core.ResultPage;
 import com.creactiviti.piper.workflows.model.HumanTaskAction;
 import com.creactiviti.piper.workflows.model.HumanTaskAssignee;
 import com.creactiviti.piper.workflows.model.ReleasePipelineBuildInput;
@@ -27,6 +28,7 @@ import java.util.Map;
 @Slf4j
 public class WorkflowJdbcRepository {
 
+    private static final int DEFAULT_PAGE_SIZE = 10;
     private NamedParameterJdbcOperations jdbc;
     @Autowired
     ObjectMapper jsonMapper;
@@ -39,6 +41,22 @@ public class WorkflowJdbcRepository {
                     "on p.workflowid = pv.workflowid and p.headrevision = versionid " +
                     "where p.customerid = :customerID and p.projectid = :projectID", params, this::workflowMapper);
         return list;
+    }
+
+    public ResultPage<HumanTaskAssignee> findTasksToActByUser(String userId, Integer aPageNumber) {
+
+        log.info("Retrieving tasks assigned to user {}", userId);
+        Map<String, String> params = new HashMap<>();
+        params.put("userid", userId);
+        Integer totalItems = jdbc.queryForObject("select count(*) from humantaskassignee where assigneename = :userid", params, Integer.class);
+        List<HumanTaskAssignee> items = jdbc.query("select htassign.* from humantaskassignee htassign left outer join humantaskaction htact on htassign.id = htact.humantaskid where htact.humantaskid is null and htassign.assigneename = :userid and htassign.taskinstanceid in (select id from task_execution where job_id in (select id from job where status = 'WAITING') )", params, this::humanTaskAssigneeMapper);
+
+        ResultPage<HumanTaskAssignee> resultPage = new ResultPage<>(HumanTaskAssignee.class);
+        resultPage.setItems(items);
+        resultPage.setNumber(items.size() > 0 ? aPageNumber : 0);
+        resultPage.setTotalItems(totalItems);
+        resultPage.setTotalPages(items.size() > 0 ? totalItems / DEFAULT_PAGE_SIZE + 1 : 0);
+        return resultPage;
     }
 
     public void insertHumanTaskAssignee(HumanTaskAssignee taskAssignee)  {
@@ -85,7 +103,18 @@ public class WorkflowJdbcRepository {
         } catch (IOException e) {
             log.error("Exception while parsing buildInput for WFName {}", withInput.getName(), e);
         }
-
         return withInput;
+    }
+
+    private HumanTaskAssignee humanTaskAssigneeMapper(ResultSet rs, int i) throws SQLException {
+
+        HumanTaskAssignee hassignee = HumanTaskAssignee.builder()
+                .assignDate(rs.getDate("assigndate"))
+                .assigneeId(rs.getString("assigneeid"))
+                .assigneeName(rs.getString("assigneename"))
+                .assigneeType(rs.getString("assigneetype"))
+                .taskInstanceId(rs.getString("taskinstanceid"))
+                .humanTaskId(rs.getLong("id")).build();
+        return hassignee;
     }
 }

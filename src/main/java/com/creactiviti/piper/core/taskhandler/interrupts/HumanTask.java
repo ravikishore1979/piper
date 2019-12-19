@@ -45,7 +45,7 @@ public abstract class HumanTask extends Wait {
     @Override
     public Object handleEvent(Task task) throws Exception {
         HumanTaskAssignee humanTaskAssignee = iHumanTaskAssigneeRepository.findOne(task.getLong(DSL.HUMAN_TASK_ID));
-        Assert.notNull(humanTaskAssignee, String.format("humanTaskAssignee object not found for assignee ID [%s]", task.get(DSL.HUMAN_TASK_ID)));
+        Assert.notNull(humanTaskAssignee, String.format("humanTaskAssignee object not found for assignee ID [%s]", task.getString(DSL.HUMAN_TASK_ID)));
         Map<String, Object> taskCompleteInput = task.get(DSL.TASK_ACTION_INPUT, Map.class);
         Object taskOutput = taskCompleteInput.get("humanResponse");
         SimpleTaskExecution eTask = (SimpleTaskExecution)task;

@@ -2,8 +2,11 @@ package com.creactiviti.piper.web;
 
 
 import com.creactiviti.piper.core.Coordinator;
+import com.creactiviti.piper.core.Page;
 import com.creactiviti.piper.core.job.Job;
 import com.creactiviti.piper.core.task.TaskActions;
+import com.creactiviti.piper.workflows.model.HumanTaskAssignee;
+import com.creactiviti.piper.workflows.repos.WorkflowJdbcRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,6 +25,8 @@ public class TasksController {
 
     @Autowired
     private Coordinator coordinator;
+    @Autowired
+    private WorkflowJdbcRepository workflowJdbcRepository;
 
     @PutMapping("/{taskId}")
     public Job performTaskAction(@PathVariable(name = "taskId") String taskId, @RequestParam(name = "action") TaskActions action,
@@ -42,6 +47,11 @@ public class TasksController {
                 throw new IllegalArgumentException(String.format("Invalid action [%s] for task [%s]", action, taskId));
             }
         }
+    }
+
+    @GetMapping("/user")
+    public Page<HumanTaskAssignee> getWaitingTasksByUser(@RequestParam(name = "userid") String userId, @RequestParam(value="p",defaultValue="1") Integer aPageNumber) {
+        return workflowJdbcRepository.findTasksToActByUser(userId, aPageNumber);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
