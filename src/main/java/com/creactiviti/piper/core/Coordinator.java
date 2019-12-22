@@ -66,6 +66,7 @@ public class Coordinator {
   private Messenger messenger;
 
   private static final String INSTANTIATED_BY = "instantiatedBy";
+  private static final String JOB_CYCLE_NAME = "cycleName";
   private static final String PIPELINE_ID = "pipelineId";
   private static final String TAGS = "tags";
   private static final String INPUTS = "inputs";
@@ -109,6 +110,7 @@ public class Coordinator {
     job.setWebhooks(webhooks!=null?webhooks:Collections.EMPTY_LIST);
     job.setInputs(inputs);
     job.setInstantiatedBy(jobParams.getRequiredString(INSTANTIATED_BY));
+    job.setJobCycleName(jobParams.getRequiredString(JOB_CYCLE_NAME));
     log.debug("Job {} started",job.getId());
     jobRepository.create(job);
     

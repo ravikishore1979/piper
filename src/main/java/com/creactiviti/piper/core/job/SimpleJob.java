@@ -204,8 +204,17 @@ public class SimpleJob extends MapObject implements Job {
     return getString(DSL.INSTANTIATED_BY, null);
   }
 
+  @Override
+  public String getJobCycleName() {
+    return getString(DSL.JOB_CYCLE_NAME, null);
+  }
+
   public void setInstantiatedBy(String userID) {
     set(DSL.INSTANTIATED_BY, userID);
+  }
+
+  public void setJobCycleName(String cycleName) {
+    set(DSL.JOB_CYCLE_NAME, cycleName);
   }
 
   public void setWebhooks (List<Accessor> aWebhooks) {

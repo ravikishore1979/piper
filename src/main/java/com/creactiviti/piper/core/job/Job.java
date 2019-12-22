@@ -147,4 +147,9 @@ public interface Job extends Errorable, Prioritizable {
    */
   String getInstantiatedBy();
 
+  /**
+   * Returns the cycleName provided for the instance/job
+   * @return
+   */
+  String getJobCycleName();
 }

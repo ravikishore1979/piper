@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.PrintStream;
 import java.util.List;
 
+import com.creactiviti.piper.core.job.Job;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.ExecuteException;
@@ -44,7 +45,7 @@ public class Ffmpeg implements TaskHandler<Object> {
   private Logger log = LoggerFactory.getLogger(getClass());
 
   @Override
-  public Object handle(Task aTask) throws Exception {
+  public Object handle(Task aTask, Job aJob) throws Exception {
     List<String> options = aTask.getList("options", String.class);
     CommandLine cmd = new CommandLine ("ffmpeg");
     options.forEach(o->cmd.addArgument(o));

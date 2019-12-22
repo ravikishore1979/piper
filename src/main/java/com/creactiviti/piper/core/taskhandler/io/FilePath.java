@@ -15,6 +15,7 @@
  */
 package com.creactiviti.piper.core.taskhandler.io;
 
+import com.creactiviti.piper.core.job.Job;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.stereotype.Component;
 
@@ -34,7 +35,7 @@ import com.creactiviti.piper.core.task.TaskHandler;
 public class FilePath implements TaskHandler<Object> {
 
   @Override
-  public Object handle (Task aTask) {
+  public Object handle(Task aTask, Job aJob) {
     return FilenameUtils.getFullPathNoEndSeparator(aTask.getRequiredString("filename"));
   }
 

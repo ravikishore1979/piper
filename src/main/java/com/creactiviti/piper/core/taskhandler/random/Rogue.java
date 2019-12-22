@@ -15,6 +15,7 @@
  */
 package com.creactiviti.piper.core.taskhandler.random;
 
+import com.creactiviti.piper.core.job.Job;
 import org.apache.commons.lang3.RandomUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
@@ -34,7 +35,7 @@ import com.creactiviti.piper.core.task.TaskHandler;
 public class Rogue implements TaskHandler<Object> {
 
   @Override
-  public Object handle(Task aTask) throws Exception {
+  public Object handle(Task aTask, Job aJob) throws Exception {
     float nextFloat = RandomUtils.nextFloat(0, 1);
     float probabilty = aTask.getFloat("probabilty",0.5f);
     Assert.isTrue(probabilty>=0 && probabilty<=1,"probability must be a value between 0 and 1");

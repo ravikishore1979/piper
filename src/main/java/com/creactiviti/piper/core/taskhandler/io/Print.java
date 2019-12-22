@@ -15,6 +15,7 @@
  */
 package com.creactiviti.piper.core.taskhandler.io;
 
+import com.creactiviti.piper.core.job.Job;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -28,7 +29,7 @@ public class Print implements TaskHandler<Object> {
   private Logger log = LoggerFactory.getLogger(getClass());
 
   @Override
-  public Object handle (Task aTask) {
+  public Object handle(Task aTask, Job aJob) {
     log.info(aTask.getRequiredString("text"));
     return null;
   }

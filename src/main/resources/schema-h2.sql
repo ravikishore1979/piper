@@ -13,7 +13,8 @@ create table if not exists job (
   webhooks text not null,
   outputs text not null,
   parent_task_execution_id varchar(256),
-  instantiated_by varchar(50)
+  instantiated_by varchar(50),
+  cyclename varchar(50)
 );
 
 create table if not exists task_execution  (
@@ -73,6 +74,8 @@ create table if not exists humantaskassignee (
     assigneename varchar(50),
     assigndate datetime,
     businesslogicid varchar(10),
+    releaseworkflow varchar(50),
+    releasecyclename varchar(50),
     index assignee_ix(assigneeid),
     index taskinstance_fk(taskinstanceid),
     foreign key(taskinstanceid) references task_execution(id)

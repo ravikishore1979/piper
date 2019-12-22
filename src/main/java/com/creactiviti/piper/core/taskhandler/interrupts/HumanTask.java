@@ -1,6 +1,8 @@
 package com.creactiviti.piper.core.taskhandler.interrupts;
 
 import com.creactiviti.piper.core.DSL;
+import com.creactiviti.piper.core.job.Job;
+import com.creactiviti.piper.core.job.SimpleJob;
 import com.creactiviti.piper.core.task.SimpleTaskExecution;
 import com.creactiviti.piper.core.task.Task;
 import com.creactiviti.piper.core.task.TaskActions;
@@ -33,8 +35,8 @@ public abstract class HumanTask extends Wait {
     private WorkflowJdbcRepository workflowJdbcRepository;
 
     @Override
-    public Object handle(Task aTask) throws Exception {
-        HumanTaskAssignee taskAssignee = buildHumanTaskAssignee(aTask);
+    public Object handle(Task aTask, Job aJob) throws Exception {
+        HumanTaskAssignee taskAssignee = buildHumanTaskAssignee(aTask, aJob);
         workflowJdbcRepository.insertHumanTaskAssignee(taskAssignee);
         log.info("Inserted HumanTask ID  {}", taskAssignee.getHumanTaskId());
         SimpleTaskExecution eTask = (SimpleTaskExecution)aTask;
@@ -70,14 +72,19 @@ public abstract class HumanTask extends Wait {
         return true;
     }
 
-    private HumanTaskAssignee buildHumanTaskAssignee(Task aTask) {
+    private HumanTaskAssignee buildHumanTaskAssignee(Task aTask, Job aJob) {
+
+        Assert.notNull(aJob, String.format("Job object is null in Task object [%s]", aTask.getString(DSL.ID)));
+
         HumanTaskAssignee humanTaskAssignee = HumanTaskAssignee.builder()
                 .assigneeId(aTask.getString(DSL.ASSIGNEE_ID))
                 .assigneeType(aTask.getString(DSL.ASSIGNEE_TYPE))
                 .assigneeName(aTask.getString(DSL.ASSIGNEE_TO))
                 .taskInstanceId(aTask.getString(DSL.ID))
                 .assignDate(new Date())
-                .businessLogicID("ALL").build();
+                .businessLogicID("ALL")
+                .releaseWorkflow(aJob.getLabel())
+                .releaseCycleName(aJob.getJobCycleName()).build();
         return humanTaskAssignee;
     }
 

@@ -19,7 +19,7 @@ public class WorkerTests {
     messenger.receive(Queues.EVENTS, (t)-> {} );
     worker.setMessenger(messenger);
     worker.setEventPublisher((e)->{});
-    worker.setTaskHandlerResolver((jt) -> (t) -> "done");
+    worker.setTaskHandlerResolver((jt) -> (t, aJob) -> "done");
     SimpleTaskExecution task = SimpleTaskExecution.create();
     task.setId("1234");
     task.setJobId("4567");
@@ -35,7 +35,7 @@ public class WorkerTests {
     messenger.receive(Queues.EVENTS, (t)-> {} );
     worker.setMessenger(messenger);
     worker.setEventPublisher((e)->{});
-    worker.setTaskHandlerResolver((jt) -> (t) -> {
+    worker.setTaskHandlerResolver((jt) -> (t, aJob) -> {
       throw new IllegalArgumentException("bad input");
     });
     SimpleTaskExecution task = SimpleTaskExecution.create();

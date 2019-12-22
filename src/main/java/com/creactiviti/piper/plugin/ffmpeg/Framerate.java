@@ -17,6 +17,7 @@ package com.creactiviti.piper.plugin.ffmpeg;
 
 import java.util.Map;
 
+import com.creactiviti.piper.core.job.Job;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
@@ -34,8 +35,8 @@ public class Framerate implements TaskHandler<Double> {
   private final Mediainfo mediainfo = new Mediainfo();
   
   @Override
-  public Double handle (Task aTask) throws Exception {
-    Map<String, Object> mediainfoResult = mediainfo.handle(aTask);
+  public Double handle(Task aTask, Job aJob) throws Exception {
+    Map<String, Object> mediainfoResult = mediainfo.handle(aTask, aJob);
     String frameRateStr = (String) mediainfoResult.get("video_frame_rate");
     Assert.notNull(frameRateStr, "can not determine framerate");
     return Double.valueOf(frameRateStr.replaceAll("[^0-9\\.]", ""));

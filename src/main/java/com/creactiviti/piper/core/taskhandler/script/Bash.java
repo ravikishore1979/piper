@@ -18,6 +18,7 @@ package com.creactiviti.piper.core.taskhandler.script;
 import java.io.File;
 import java.io.PrintStream;
 
+import com.creactiviti.piper.core.job.Job;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.ExecuteException;
@@ -43,7 +44,7 @@ public class Bash implements TaskHandler<String> {
   private Logger logger = LoggerFactory.getLogger(getClass());
 
   @Override
-  public String handle(Task aTask) throws Exception {
+  public String handle(Task aTask, Job aJob) throws Exception {
     File scriptFile = File.createTempFile("_script", ".sh");
     File logFile = File.createTempFile("log", null);
     FileUtils.writeStringToFile(scriptFile, aTask.getRequiredString("script"));

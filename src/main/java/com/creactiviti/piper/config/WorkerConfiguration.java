@@ -15,6 +15,7 @@
  */
 package com.creactiviti.piper.config;
 
+import com.creactiviti.piper.core.job.JobRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -32,6 +33,7 @@ import com.creactiviti.piper.core.task.TaskHandlerResolver;
 public class WorkerConfiguration {
   
   @Autowired @Lazy private Messenger messenger;
+  @Autowired private JobRepository jobRepository;
   
   @Bean
   Worker worker (TaskHandlerResolver aTaskHandlerResolver, Messenger aMessenger) {
@@ -39,6 +41,7 @@ public class WorkerConfiguration {
     worker.setMessenger(aMessenger);
     worker.setTaskHandlerResolver(aTaskHandlerResolver);
     worker.setEventPublisher(workerEventPublisher());
+    worker.setJobRepository(jobRepository);
     return worker;
   }
 

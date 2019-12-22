@@ -1,6 +1,7 @@
 package com.creactiviti.piper.core.taskhandler.interrupts;
 
 import com.creactiviti.piper.core.DSL;
+import com.creactiviti.piper.core.job.Job;
 import com.creactiviti.piper.core.task.Task;
 import org.springframework.util.Assert;
 
@@ -23,7 +24,7 @@ public class AsyncRest extends Wait {
     }
 
     @Override
-    public Object handle(Task aTask) throws Exception {
+    public Object handle(Task aTask, Job aJob) throws Exception {
         //Implementation for calling a Asynchronous REST API.
         String url = aTask.get("restapi");
 

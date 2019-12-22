@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.creactiviti.piper.core.job.Job;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
@@ -42,10 +43,10 @@ public class Vsplit implements TaskHandler<List<Map<String,Object>>> {
   private static final int MIN_CHUNK_SIZE = 5;
   
   @Override
-  public List<Map<String, Object>> handle (Task aTask) throws Exception {
+  public List<Map<String, Object>> handle(Task aTask, Job aJob) throws Exception {
     List<Map<String,Object>> chunks = new ArrayList<> ();
-    Double duration = vduration.handle(aTask);
-    Double frate = framerate.handle(aTask);
+    Double duration = vduration.handle(aTask, aJob);
+    Double frate = framerate.handle(aTask, aJob);
     Assert.notNull(duration,"could not determine duration");
     Assert.notNull(frate,"could not determine Frame Rate");
     double frateCeil = Math.ceil(frate);

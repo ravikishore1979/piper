@@ -1,10 +1,7 @@
 package com.creactiviti.piper.workflows.repos;
 
 import com.creactiviti.piper.core.ResultPage;
-import com.creactiviti.piper.workflows.model.HumanTaskAction;
-import com.creactiviti.piper.workflows.model.HumanTaskAssignee;
-import com.creactiviti.piper.workflows.model.ReleasePipelineBuildInput;
-import com.creactiviti.piper.workflows.model.WorkflowWithInput;
+import com.creactiviti.piper.workflows.model.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
 import lombok.Setter;
@@ -49,7 +46,12 @@ public class WorkflowJdbcRepository {
         Map<String, String> params = new HashMap<>();
         params.put("userid", userId);
         Integer totalItems = jdbc.queryForObject("select count(*) from humantaskassignee where assigneename = :userid", params, Integer.class);
-        List<HumanTaskAssignee> items = jdbc.query("select htassign.* from humantaskassignee htassign left outer join humantaskaction htact on htassign.id = htact.humantaskid where htact.humantaskid is null and htassign.assigneename = :userid and htassign.taskinstanceid in (select id from task_execution where job_id in (select id from job where status = 'WAITING') )", params, this::humanTaskAssigneeMapper);
+        List<HumanTaskAssignee> items = jdbc.query("select htassign.*, te.serialized_execution from " +
+                        "(humantaskassignee htassign join task_execution te on htassign.taskinstanceid = te.id)  " +
+                        "left outer join humantaskaction htact on htassign.id = htact.humantaskid " +
+                        "where htact.humantaskid is null and htassign.assigneename = :userid and htassign.taskinstanceid in " +
+                        "(select id from task_execution where job_id in (select id from job where status = 'WAITING') )",
+                params, this::humanTaskAssigneeMapper);
 
         ResultPage<HumanTaskAssignee> resultPage = new ResultPage<>(HumanTaskAssignee.class);
         resultPage.setItems(items);
@@ -67,10 +69,12 @@ public class WorkflowJdbcRepository {
                 .addValue("assigneetype", taskAssignee.getAssigneeType())
                 .addValue("assigneename", taskAssignee.getAssigneeName())
                 .addValue("assigndate", taskAssignee.getAssignDate())
-                .addValue("businesslogicid", taskAssignee.getBusinessLogicID());
+                .addValue("businesslogicid", taskAssignee.getBusinessLogicID())
+                .addValue("releasecyclename", taskAssignee.getReleaseCycleName())
+                .addValue("releaseworkflow", taskAssignee.getReleaseWorkflow());
         KeyHolder keyHolder = new GeneratedKeyHolder();
-        jdbc.update("insert into  humantaskassignee (taskinstanceid, assigneeid, assigneetype, assigneename, assigndate, businesslogicid) " +
-                "values (:taskinstanceid, :assigneeid, :assigneetype, :assigneename, :assigndate, :businesslogicid)", params, keyHolder);
+        jdbc.update("insert into  humantaskassignee (taskinstanceid, assigneeid, assigneetype, assigneename, assigndate, businesslogicid, releaseworkflow, releasecyclename) " +
+                "values (:taskinstanceid, :assigneeid, :assigneetype, :assigneename, :assigndate, :businesslogicid,:releaseworkflow,:releasecyclename)", params, keyHolder);
         taskAssignee.setHumanTaskId(keyHolder.getKey().longValue());
     }
 
@@ -108,13 +112,22 @@ public class WorkflowJdbcRepository {
 
     private HumanTaskAssignee humanTaskAssigneeMapper(ResultSet rs, int i) throws SQLException {
 
+        ApprovalTask approvalTask = null;
+        try {
+            approvalTask = jsonMapper.readValue(rs.getString("serialized_execution"), ApprovalTask.class);
+        } catch (IOException e) {
+            log.error("Exception while parsing serialized_execution for taskID {}", rs.getString("taskinstanceid"), e);
+        }
         HumanTaskAssignee hassignee = HumanTaskAssignee.builder()
                 .assignDate(rs.getDate("assigndate"))
                 .assigneeId(rs.getString("assigneeid"))
                 .assigneeName(rs.getString("assigneename"))
                 .assigneeType(rs.getString("assigneetype"))
                 .taskInstanceId(rs.getString("taskinstanceid"))
-                .humanTaskId(rs.getLong("id")).build();
+                .humanTaskId(rs.getLong("id"))
+                .releaseWorkflow(rs.getString("releaseworkflow"))
+                .releaseCycleName(rs.getString("releasecyclename"))
+                .humanTask(approvalTask).build();
         return hassignee;
     }
 }

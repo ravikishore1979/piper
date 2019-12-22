@@ -15,6 +15,8 @@
  */
 package com.creactiviti.piper.core.task;
 
+import com.creactiviti.piper.core.job.Job;
+
 /**
  * A startegy interface used for executing a {@link TaskExecution}.
  * 
@@ -23,6 +25,6 @@ package com.creactiviti.piper.core.task;
  */
 public interface TaskHandler<O> {
 
-  O handle (Task aTask) throws Exception;
+  O handle(Task aTask, Job aJob) throws Exception;
   
 }

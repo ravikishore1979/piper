@@ -19,6 +19,7 @@ import com.creactiviti.piper.core.annotations.ConditionalOnWorker;
 import com.creactiviti.piper.core.event.EventPublisher;
 import com.creactiviti.piper.core.event.Events;
 import com.creactiviti.piper.core.event.PiperEvent;
+import com.creactiviti.piper.core.job.Job;
 import com.creactiviti.piper.core.task.Task;
 import com.creactiviti.piper.core.task.TaskExecution;
 import com.creactiviti.piper.core.task.TaskHandler;
@@ -46,7 +47,7 @@ public class Download implements TaskHandler<Object> {
     EventPublisher eventPublisher;
 
     @Override
-    public Object handle(Task aTask) {
+    public Object handle(Task aTask, Job aJob) {
         try {
             URL url = new URL(aTask.getRequiredString("url"));
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();

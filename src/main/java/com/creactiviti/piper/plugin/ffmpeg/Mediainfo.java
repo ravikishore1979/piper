@@ -20,6 +20,7 @@ import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.creactiviti.piper.core.job.Job;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.ExecuteException;
@@ -43,7 +44,7 @@ public class Mediainfo implements TaskHandler<Map<String,Object>> {
   private final Logger log = LoggerFactory.getLogger(getClass());
   
   @Override
-  public Map<String,Object> handle (Task aTask) throws Exception {
+  public Map<String,Object> handle(Task aTask, Job aJob) throws Exception {
     CommandLine cmd = new CommandLine ("mediainfo");
     cmd.addArgument(aTask.getRequiredString("input"));
     log.debug("{}",cmd);

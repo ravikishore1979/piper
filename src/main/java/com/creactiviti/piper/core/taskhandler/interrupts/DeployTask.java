@@ -1,6 +1,7 @@
 package com.creactiviti.piper.core.taskhandler.interrupts;
 
 import com.creactiviti.piper.core.DSL;
+import com.creactiviti.piper.core.job.Job;
 import com.creactiviti.piper.core.task.SimplePipelineTask;
 import com.creactiviti.piper.core.task.SimpleTaskExecution;
 import com.creactiviti.piper.core.task.Task;
@@ -41,7 +42,7 @@ public class DeployTask extends Wait {
     }
 
     @Override
-    public Object handle(Task aTask) throws Exception {
+    public Object handle(Task aTask, Job aJob) throws Exception {
         log.info("Deploying the task [{}]", aTask);
         Map<String, Object> outputMap = new HashMap<>();
         String deployJobName = aTask.getRequiredString(JOB_NAME);

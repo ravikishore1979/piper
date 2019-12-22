@@ -87,7 +87,7 @@ public class CoordinatorTests {
     coordinator.setJobRepository(jobRepository);
     coordinator.setPipelineRepository(new ResourceBasedPipelineRepository());
     coordinator.setJobTaskRepository(taskRepository);
-    
+    worker.setJobRepository(jobRepository);
     SynchMessenger coordinatorMessenger = new SynchMessenger();
     coordinatorMessenger.receive(Queues.TASKS, (o)->worker.handle((TaskExecution)o));
     WorkTaskDispatcher taskDispatcher = new WorkTaskDispatcher(coordinatorMessenger);

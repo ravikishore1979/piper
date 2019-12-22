@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.creactiviti.piper.core.job.Job;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.ExecuteException;
@@ -47,7 +48,7 @@ public class Ffprobe implements TaskHandler<Map<String,Object>> {
   private final ObjectMapper json = new ObjectMapper();
   
   @Override
-  public Map<String,Object> handle(Task aTask) throws Exception {
+  public Map<String,Object> handle(Task aTask, Job aJob) throws Exception {
     CommandLine cmd = new CommandLine ("ffprobe");
     cmd.addArgument("-v")
        .addArgument("quiet")

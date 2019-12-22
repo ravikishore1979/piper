@@ -92,7 +92,7 @@ public class JdbcJobRepository implements JobRepository {
   @Override
   public void create (Job aJob) {
     MapSqlParameterSource sqlParameterSource = createSqlParameterSource(aJob);
-    jdbc.update("insert into job (id,create_time,start_time,status,current_task,pipeline_id,label,tags,priority,inputs,webhooks,outputs,parent_task_execution_id,instantiated_by) values (:id,:createTime,:startTime,:status,:currentTask,:pipelineId,:label,:tags,:priority,:inputs,:webhooks,:outputs,:parentTaskExecutionId, :instantiated_by)", sqlParameterSource);
+    jdbc.update("insert into job (id,create_time,start_time,status,current_task,pipeline_id,label,tags,priority,inputs,webhooks,outputs,parent_task_execution_id,instantiated_by,cyclename) values (:id,:createTime,:startTime,:status,:currentTask,:pipelineId,:label,:tags,:priority,:inputs,:webhooks,:outputs,:parentTaskExecutionId, :instantiated_by, :cyclename)", sqlParameterSource);
   }
 
   private MapSqlParameterSource createSqlParameterSource(Job aJob) {
@@ -117,6 +117,7 @@ public class JdbcJobRepository implements JobRepository {
     sqlParameterSource.addValue("webhooks", JsonHelper.writeValueAsString(json,job.getWebhooks()));
     sqlParameterSource.addValue("parentTaskExecutionId", job.getParentTaskExecutionId());
     sqlParameterSource.addValue("instantiated_by", job.getInstantiatedBy());
+    sqlParameterSource.addValue("cyclename", job.getJobCycleName());
     return sqlParameterSource;
   }
   
@@ -141,6 +142,7 @@ public class JdbcJobRepository implements JobRepository {
         map.put("currentTask", aRs.getInt("current_task"));
         map.put("pipelineId", aRs.getString("pipeline_id"));
         map.put(DSL.INSTANTIATED_BY, aRs.getString("instantiated_by"));
+        map.put(DSL.JOB_CYCLE_NAME, aRs.getString("cyclename"));
         map.put("label", aRs.getString("label"));
         map.put("createTime", aRs.getTimestamp("create_time"));
         map.put("startTime", aRs.getTimestamp("start_time"));

@@ -15,6 +15,7 @@
  */
 package com.creactiviti.piper.core.taskhandler.io;
 
+import com.creactiviti.piper.core.job.Job;
 import org.springframework.stereotype.Component;
 
 import com.creactiviti.piper.core.task.Task;
@@ -29,7 +30,7 @@ import com.creactiviti.piper.core.task.TaskHandler;
 public class Var implements TaskHandler<Object> {
 
   @Override
-  public Object handle (Task aTask) {
+  public Object handle(Task aTask, Job aJob) {
     return aTask.getRequired("value");
   }
 

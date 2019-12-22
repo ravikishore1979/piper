@@ -1,5 +1,6 @@
 package com.creactiviti.piper.workflows.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 
 import javax.persistence.*;
@@ -31,5 +32,13 @@ public class HumanTaskAssignee {
     private String businessLogicID;
     @Column(name = "assigndate")
     private Date assignDate;
+    @Column(name = "releaseworkflow")
+    private String releaseWorkflow;
+    @Column(name = "releasecyclename")
+    private String releaseCycleName;
+
+    @JsonInclude
+    @Transient
+    private WorkflowTask humanTask;
 
 }

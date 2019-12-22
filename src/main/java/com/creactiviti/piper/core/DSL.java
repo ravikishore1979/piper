@@ -15,6 +15,8 @@
  */
 package com.creactiviti.piper.core;
 
+import com.creactiviti.piper.core.job.Job;
+
 /**
  * 
  * @author Arik Cohen
@@ -105,6 +107,8 @@ public class DSL {
   public static final String VALUE = "value";
 
   public static final String INSTANTIATED_BY = "instantiatedBy";
+
+  public static final String JOB_CYCLE_NAME = "cycleName";
 
   public static final String TASK_ACTION_INPUT = "taskCompleteInput";
 

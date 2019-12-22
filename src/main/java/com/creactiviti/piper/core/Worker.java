@@ -20,6 +20,8 @@ import com.creactiviti.piper.core.error.ErrorObject;
 import com.creactiviti.piper.core.event.EventPublisher;
 import com.creactiviti.piper.core.event.Events;
 import com.creactiviti.piper.core.event.PiperEvent;
+import com.creactiviti.piper.core.job.Job;
+import com.creactiviti.piper.core.job.JobRepository;
 import com.creactiviti.piper.core.messenger.Messenger;
 import com.creactiviti.piper.core.messenger.Queues;
 import com.creactiviti.piper.core.task.*;
@@ -56,6 +58,7 @@ public class Worker {
   private final Map<String, Future<?>> taskExecutions = new ConcurrentHashMap<>();
   private TaskEvaluator taskEvaluator = new SpelTaskEvaluator();
   private EventPublisher eventPublisher;
+  private JobRepository jobRepository;
 
   private Logger logger = LoggerFactory.getLogger(getClass());
   
@@ -71,11 +74,12 @@ public class Worker {
   public void handle (TaskExecution aTask) {
     Future<?> future = executors.submit(() -> {
       try {
+        Job aJob = jobRepository.findOne(aTask.getJobId());
         long startTime = System.currentTimeMillis();
         logger.debug("Recived task: {}",aTask);
         TaskHandler<?> taskHandler = taskHandlerResolver.resolve(aTask);
         eventPublisher.publishEvent(PiperEvent.of(Events.TASK_STARTED,"taskId",aTask.getId(),"jobId",aTask.getJobId()));
-        Object output = taskHandler.handle(aTask);
+        Object output = taskHandler.handle(aTask, aJob);
         SimpleTaskExecution completion = SimpleTaskExecution.createForUpdate(aTask);
         if(output!=null) {
           if(completion.getOutput() != null) {
@@ -232,5 +236,7 @@ public class Worker {
   public void setEventPublisher(EventPublisher aEventPublisher) {
     eventPublisher = aEventPublisher;
   }
+
+  public void setJobRepository(JobRepository aJobRepository) {jobRepository = aJobRepository;}
   
 }

@@ -23,6 +23,7 @@ import java.io.Writer;
 import java.util.Arrays;
 import java.util.List;
 
+import com.creactiviti.piper.core.job.Job;
 import org.apache.commons.io.FileUtils;
 import org.springframework.stereotype.Component;
 
@@ -44,7 +45,7 @@ public class Vstitch implements TaskHandler<Object> {
   private final Ffmpeg ffmpeg = new Ffmpeg();
   
   @Override
-  public Object handle (Task aTask) throws Exception {
+  public Object handle(Task aTask, Job aJob) throws Exception {
     List<String> chunks = aTask.getList("chunks",String.class);
     File tempFile = File.createTempFile("_chunks", ".txt");
     try {
@@ -64,7 +65,7 @@ public class Vstitch implements TaskHandler<Object> {
         aTask.getRequiredString("output")
       );
       ffmpegTask.set("options", options);
-      ffmpeg.handle(ffmpegTask);
+      ffmpeg.handle(ffmpegTask, aJob);
     }
     finally {
       FileUtils.deleteQuietly(tempFile);

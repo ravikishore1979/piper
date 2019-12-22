@@ -22,6 +22,7 @@ package com.creactiviti.piper.plugin.ffmpeg;
 
 import java.util.Map;
 
+import com.creactiviti.piper.core.job.Job;
 import org.springframework.stereotype.Component;
 
 import com.creactiviti.piper.core.task.Task;
@@ -33,8 +34,8 @@ public class Dar implements TaskHandler<String> {
   private final Mediainfo mediainfo = new Mediainfo();
   
   @Override
-  public String handle (Task aTask) throws Exception {
-    Map<String, Object> mediainfoResult = mediainfo.handle(aTask);
+  public String handle(Task aTask, Job aJob) throws Exception {
+    Map<String, Object> mediainfoResult = mediainfo.handle(aTask, aJob);
     return (String) mediainfoResult.get("video_display_aspect_ratio");
   }
 
