@@ -8,8 +8,8 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @ToString
 @SuperBuilder
-public class ApprovalTask extends HumanWorkflowTask{
-
+public class ManualTask extends HumanWorkflowTask {
     @Builder.Default
-    private String type = "approvalTask";
+    private String type = "manualTask";
+
 }

@@ -112,9 +112,9 @@ public class WorkflowJdbcRepository {
 
     private HumanTaskAssignee humanTaskAssigneeMapper(ResultSet rs, int i) throws SQLException {
 
-        ApprovalTask approvalTask = null;
+        HumanWorkflowTask approvalTask = null;
         try {
-            approvalTask = jsonMapper.readValue(rs.getString("serialized_execution"), ApprovalTask.class);
+            approvalTask = jsonMapper.readValue(rs.getString("serialized_execution"), HumanWorkflowTask.class);
         } catch (IOException e) {
             log.error("Exception while parsing serialized_execution for taskID {}", rs.getString("taskinstanceid"), e);
         }

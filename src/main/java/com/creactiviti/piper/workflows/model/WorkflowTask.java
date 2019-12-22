@@ -16,6 +16,7 @@ import lombok.experimental.SuperBuilder;
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "type")
 @JsonSubTypes({
         @JsonSubTypes.Type(value = ApprovalTask.class, name = "approvalTask"),
+        @JsonSubTypes.Type(value = ManualTask.class, name = "manualTask"),
         @JsonSubTypes.Type(value = RandomInt.class, name = "randomInt"),
         @JsonSubTypes.Type(value = PrintTask.class, name = "print"),
         @JsonSubTypes.Type(value = JenkinsJobTask.class, name = "deployTask")
