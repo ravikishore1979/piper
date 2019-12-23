@@ -64,7 +64,8 @@ public abstract class HumanTask extends Wait {
     protected abstract TaskStatus processBusinessLogic(HumanTaskAssignee humanTaskAssignee, Task task, Object taskOutput);
 
     protected boolean isValidAction(HumanTaskAssignee humanTaskAssignee, TaskActions taskActions, String actedBy) {
-        Assert.notEmpty(Arrays.asList(actedBy, humanTaskAssignee.getAssigneeName()), String.format("Either of actedBy [%s]or assigneeID [%s] is empty.", actedBy, humanTaskAssignee.getAssigneeName()));
+        Assert.notNull(actedBy, String.format("actedBy should not be null. for taskID [%s]", humanTaskAssignee.getTaskInstanceId()));
+        Assert.notNull(humanTaskAssignee.getAssigneeName(), String.format("assigneeName  should not be null. for taskID [%s]", humanTaskAssignee.getTaskInstanceId()));
         if(!actedBy.equals(humanTaskAssignee.getAssigneeName())) {
             log.error("Task should executed by [{}] but executed by [{}]", humanTaskAssignee.getAssigneeName(), actedBy);
             return false;

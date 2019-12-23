@@ -74,7 +74,7 @@ create table if not exists humantaskassignee (
     assigneename varchar(50),
     assigndate datetime,
     businesslogicid varchar(10),
-    releaseworkflow varchar(50),
+    releaseworkflow varchar(256),
     releasecyclename varchar(50),
     index assignee_ix(assigneeid),
     index taskinstance_fk(taskinstanceid),
