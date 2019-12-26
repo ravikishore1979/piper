@@ -5,6 +5,7 @@ import com.creactiviti.piper.core.job.Job;
 import com.creactiviti.piper.core.task.SimplePipelineTask;
 import com.creactiviti.piper.core.task.SimpleTaskExecution;
 import com.creactiviti.piper.core.task.Task;
+import com.creactiviti.piper.core.task.TaskStatus;
 import com.creactiviti.piper.workflows.services.SaparateClientService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +39,7 @@ public class DeployTask extends Wait {
             String errorMsg = (String) jenkinsResponse.get("errorMsg");
             throw new Exception(errorMsg);
         }
+        taskObj.setStatus(TaskStatus.COMPLETED);
         return taskOutput;
     }
 
