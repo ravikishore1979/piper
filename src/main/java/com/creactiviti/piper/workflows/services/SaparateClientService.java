@@ -59,7 +59,10 @@ public class SaparateClientService implements InitializingBean {
             headers.set("Authorization", authToken);
             HttpEntity<JsonNode> httpEntity = new HttpEntity<>(inputJson, headers);
             ResponseEntity<String> responseEntity = restTemplate.exchange(this.saparateUrl.concat("/jenkins/triggerDeployJob"), HttpMethod.POST, httpEntity, String.class);
+            JsonNode outputJson = objectMapper.readTree(responseEntity.getBody());
             log.info("Response: {}", responseEntity.getBody());
+            buildNumber = outputJson.get("cycleNumber").asText("");
+            log.info("Trigger deploy job with build Number: {}", buildNumber);
         } catch (IOException | RestClientException e) {
             String errorMsg = String.format("Exception while running Deploy pipeline job in Jenkins. [%s]", jobName);
             log.error(errorMsg, e);
