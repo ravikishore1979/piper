@@ -36,7 +36,7 @@ public class WorkflowJdbcRepository {
         params.put("projectID", projectID);
         List<WorkflowWithInput> list = jdbc.query("select p.*, pv.buildinputjson from pipelines as p join pipelineversions as pv  " +
                     "on p.workflowid = pv.workflowid and p.headrevision = versionid " +
-                    "where p.customerid = :customerID and p.projectid = :projectID", params, this::workflowMapper);
+                    "where p.customerid = :customerID and p.projectid = :projectID order by p.createdtime desc", params, this::workflowMapper);
         return list;
     }
 
@@ -50,7 +50,8 @@ public class WorkflowJdbcRepository {
                         "(humantaskassignee htassign join task_execution te on htassign.taskinstanceid = te.id)  " +
                         "left outer join humantaskaction htact on htassign.id = htact.humantaskid " +
                         "where htact.humantaskid is null and htassign.assigneename = :userid and htassign.taskinstanceid in " +
-                        "(select id from task_execution where job_id in (select id from job where status = 'WAITING') )",
+                        "(select id from task_execution where job_id in (select id from job where status = 'WAITING') " +
+                        "order by htassign.assigndate desc)",
                 params, this::humanTaskAssigneeMapper);
 
         ResultPage<HumanTaskAssignee> resultPage = new ResultPage<>(HumanTaskAssignee.class);
@@ -119,7 +120,7 @@ public class WorkflowJdbcRepository {
             log.error("Exception while parsing serialized_execution for taskID {}", rs.getString("taskinstanceid"), e);
         }
         HumanTaskAssignee hassignee = HumanTaskAssignee.builder()
-                .assignDate(rs.getDate("assigndate"))
+                .assignDate(rs.getTimestamp("assigndate"))
                 .assigneeId(rs.getString("assigneeid"))
                 .assigneeName(rs.getString("assigneename"))
                 .assigneeType(rs.getString("assigneetype"))
