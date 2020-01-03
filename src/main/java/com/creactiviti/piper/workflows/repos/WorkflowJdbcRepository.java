@@ -49,9 +49,9 @@ public class WorkflowJdbcRepository {
         List<HumanTaskAssignee> items = jdbc.query("select htassign.*, te.serialized_execution from " +
                         "(humantaskassignee htassign join task_execution te on htassign.taskinstanceid = te.id)  " +
                         "left outer join humantaskaction htact on htassign.id = htact.humantaskid " +
-                        "where htact.humantaskid is null and htassign.assigneename = :userid and htassign.taskinstanceid in " +
-                        "(select id from task_execution where job_id in (select id from job where status = 'WAITING') " +
-                        "order by htassign.assigndate desc)",
+                        "where (htact.humantaskid is null and htassign.assigneename = :userid and htassign.taskinstanceid in " +
+                        "(select id from task_execution where job_id in (select id from job where status = 'WAITING'))) " +
+                        "order by htassign.assigndate desc",
                 params, this::humanTaskAssigneeMapper);
 
         ResultPage<HumanTaskAssignee> resultPage = new ResultPage<>(HumanTaskAssignee.class);

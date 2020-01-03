@@ -4,11 +4,12 @@ import com.creactiviti.piper.workflows.model.Workflow;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 
 public interface IWorkflowRepository extends JpaRepository<Workflow, Long> {
 
-    Workflow findByCustomerIdAndProjectIdAndName(String customerID, String projectID, String name);
+    Optional<Workflow> findByCustomerIdAndProjectIdAndName(String customerID, String projectID, String name);
 
     boolean existsByCustomerIdAndProjectIdAndName(String customerId, String projectId, String name);
 
@@ -16,5 +17,4 @@ public interface IWorkflowRepository extends JpaRepository<Workflow, Long> {
 
     boolean existsById(Long id);
 
-    Workflow findById(Long id);
 }

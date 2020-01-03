@@ -21,7 +21,6 @@ import org.springframework.util.Assert;
 import com.creactiviti.piper.core.messenger.Messenger;
 import com.creactiviti.piper.core.messenger.Queues;
 
-@Component
 public class WorkTaskDispatcher implements TaskDispatcher<TaskExecution>, TaskDispatcherResolver {
 
   private final Messenger messenger;

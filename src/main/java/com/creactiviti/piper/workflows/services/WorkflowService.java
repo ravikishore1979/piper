@@ -23,6 +23,7 @@ import javax.transaction.Transactional;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -55,24 +56,25 @@ public class WorkflowService {
         Assert.notNull(pipelineID, "pipelineID cannot be empty");
         Long id = NumberUtils.parseNumber(pipelineID, Long.class);
         Assert.isTrue((id > 0), "Inavlid Pipeline ID " + pipelineID);
-        return workflowRepository.findOne(id);
+        Optional<Workflow> wf = workflowRepository.findById(id);
+        return wf.isPresent() ? wf.get() : null;
     }
 
 
 
     public Workflow saveWorkFlow(Workflow wf, WorkflowVersion wfVersion) {
-        Workflow oldWf = null;
+        Optional<Workflow> oldWf = null;
         if(wf.getId() > 0 ) {
             oldWf = workflowRepository.findById(wf.getId());
             log.debug("Workflow with ID {} exists", wf.getId());
-            if(oldWf == null) {
+            if(!oldWf.isPresent()) {
                 String errorMsg = String.format("No workflow is defined with ID '%s'.", wf.getId());
                 IllegalArgumentException iae = new IllegalArgumentException(errorMsg);
                 log.error(errorMsg, iae);
                 throw iae;
             }
-            if(!oldWf.getName().equals(wf.getName())) {
-                String errorMsg = String.format("Name of the Workflow for the given ID '%s'  is '%s', this does not match with name '%s' in url param.", wf.getId(), oldWf.getName(), wf.getName());
+            if(!oldWf.get().getName().equals(wf.getName())) {
+                String errorMsg = String.format("Name of the Workflow for the given ID '%s'  is '%s', this does not match with name '%s' in url param.", wf.getId(), oldWf.get().getName(), wf.getName());
                 IllegalArgumentException iae = new IllegalArgumentException(errorMsg);
                 log.error(errorMsg, iae);
                 throw iae;
@@ -82,12 +84,13 @@ public class WorkflowService {
             log.debug("workflow with customerID '{}' project '{}' and  name '{}' exists.", wf.getCustomerId(), wf.getProjectId(), wf.getName());
         }
 
-        if (oldWf == null) {
+        if (!oldWf.isPresent()) {
             return insertIntoDB(wf, wfVersion);
         } else {
-            log.info("Workflow with name [{}] already exists in DB with ID [{}], updating.", oldWf.getName(), oldWf.getId());
-            wf.setId(oldWf.getId());
-            wf.setHeadRevision(oldWf.getHeadRevision());
+            Workflow oldWfObj = oldWf.get();
+            log.info("Workflow with name [{}] already exists in DB with ID [{}], updating.", oldWfObj.getName(), oldWfObj.getId());
+            wf.setId(oldWfObj.getId());
+            wf.setHeadRevision(oldWfObj.getHeadRevision());
             wfVersion.setWorkflowID(wf.getId());
             if(wfVersion.getVersionID() > 0 && wfVersion.getVersionID() != wf.getHeadRevision()) {
                 String errorMsg = String.format("Can only modify the head version '%s' but given version is '%s', so throwing error.", wf.getHeadRevision(), wfVersion.getVersionID());
@@ -201,8 +204,8 @@ public class WorkflowService {
 
     private WorkflowVersion getWorkflowVersion(Workflow wf, long versionId) {
         long requiredVersion =  (versionId > 0L) ?  versionId : wf.getHeadRevision();
-        WorkflowVersion wfVersion = wfVersionRepository.findOne(requiredVersion);
-        return wfVersion;
+        Optional<WorkflowVersion> wfVersion = wfVersionRepository.findById(requiredVersion);
+        return wfVersion.isPresent() ? wfVersion.get() : null;
     }
 
     /**
@@ -213,18 +216,20 @@ public class WorkflowService {
      */
     public String[] getPipelineByPiperID(String piperWorkflowID) {
         String[] ids = piperWorkflowID.split(":");
-        Workflow wf = workflowRepository.findById(Long.valueOf(ids[0]));
-        if(wf == null) {
+        Optional<Workflow> wf = workflowRepository.findById(Long.valueOf(ids[0]));
+        if(!wf.isPresent()) {
             throw new IllegalArgumentException(String.format("Workflow not found with  ID '%s' retrieved from piperID '%s'", ids[0], piperWorkflowID));
         }
-        long requiredVersion = (ids.length == 2) ? Long.valueOf(ids[1]) : wf.getHeadRevision();
-        WorkflowVersion wfVersion = wfVersionRepository.findOne(requiredVersion);
+        Workflow wfObj = wf.get();
+        long requiredVersion = (ids.length == 2) ? Long.valueOf(ids[1]) : wfObj.getHeadRevision();
+        Optional<WorkflowVersion> wfVersion = wfVersionRepository.findById(requiredVersion);
 
-        if(wfVersion == null) {
+        if(!wfVersion.isPresent()) {
             throw new IllegalArgumentException(String.format("Workflow version not found with  ID '%s' and version ID '%s'", ids[0], requiredVersion));
         }
+        WorkflowVersion wfVersionObj = wfVersion.get();
 
-        return new String[]{(wf.getId() + ":" + requiredVersion), wfVersion.getWorkflow()};
+        return new String[]{(wfObj.getId() + ":" + requiredVersion), wfVersionObj.getWorkflow()};
     }
 
     public List<WorkflowWithInput> getAllWorkflowsByProject(String customerID, String projectID) {
@@ -250,8 +255,8 @@ public class WorkflowService {
     }
 
     public Workflow getWorkflow(String customerID, String projectID, String pipelineName) {
-        Workflow wf = workflowRepository.findByCustomerIdAndProjectIdAndName(customerID, projectID, pipelineName);
-        return wf;
+        Optional<Workflow> wf = workflowRepository.findByCustomerIdAndProjectIdAndName(customerID, projectID, pipelineName);
+        return wf.isPresent() ? wf.get() : null;
     }
 }
 

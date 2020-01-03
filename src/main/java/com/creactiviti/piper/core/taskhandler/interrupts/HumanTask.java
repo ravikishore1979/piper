@@ -2,7 +2,6 @@ package com.creactiviti.piper.core.taskhandler.interrupts;
 
 import com.creactiviti.piper.core.DSL;
 import com.creactiviti.piper.core.job.Job;
-import com.creactiviti.piper.core.job.SimpleJob;
 import com.creactiviti.piper.core.task.SimpleTaskExecution;
 import com.creactiviti.piper.core.task.Task;
 import com.creactiviti.piper.core.task.TaskActions;
@@ -17,9 +16,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
-import java.util.Arrays;
 import java.util.Date;
 import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @Component
@@ -46,8 +45,9 @@ public abstract class HumanTask extends Wait {
 
     @Override
     public Object handleEvent(Task task) throws Exception {
-        HumanTaskAssignee humanTaskAssignee = iHumanTaskAssigneeRepository.findOne(task.getLong(DSL.HUMAN_TASK_ID));
-        Assert.notNull(humanTaskAssignee, String.format("humanTaskAssignee object not found for assignee ID [%s]", task.getString(DSL.HUMAN_TASK_ID)));
+        Optional<HumanTaskAssignee> htAssignee = iHumanTaskAssigneeRepository.findById(task.getLong(DSL.HUMAN_TASK_ID));
+        Assert.isTrue(htAssignee.isPresent(), String.format("humanTaskAssignee object not found for assignee ID [%s]", task.getString(DSL.HUMAN_TASK_ID)));
+        HumanTaskAssignee humanTaskAssignee = htAssignee.get();
         Map<String, Object> taskCompleteInput = task.get(DSL.TASK_ACTION_INPUT, Map.class);
         Object taskOutput = taskCompleteInput.get("humanResponse");
         SimpleTaskExecution eTask = (SimpleTaskExecution)task;
