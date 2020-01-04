@@ -180,7 +180,14 @@
 			<artifactId>http-client</artifactId>
 			<version>3.5.0.RELEASE</version>
 		</dependency>
-
+		<!-- Use this to check only for depricated propeties in boot 2.16 from 1.15 -->
+<!--
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-properties-migrator</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+-->
 	</dependencies>
 
 	<build>
