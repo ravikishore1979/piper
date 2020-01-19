@@ -20,7 +20,7 @@ import java.util.Map;
 
 @Slf4j
 @RestController
-@CrossOrigin(value = "*")
+@CrossOrigin(origins = {"https://p2001885952trial-trial-dev-ui.cfapps.us10.hana.ondemand.com/", "https://na1.saparate.com"})
 @RequestMapping("/workflows")
 public class WorkflowController {
 
