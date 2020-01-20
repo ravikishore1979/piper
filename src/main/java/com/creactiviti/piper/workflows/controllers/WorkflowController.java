@@ -9,18 +9,21 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.security.Principal;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 @Slf4j
 @RestController
-@CrossOrigin(origins = {"https://p2001885952trial-trial-dev-ui.cfapps.us10.hana.ondemand.com/", "https://na1.saparate.com"})
+@CrossOrigin(origins = {"https://p2001885952trial-trial-dev-ui.cfapps.us10.hana.ondemand.com", "https://na1.saparate.com"})
 @RequestMapping("/workflows")
 public class WorkflowController {
 
@@ -44,7 +47,7 @@ public class WorkflowController {
 
     @GetMapping(value = "/{customerID}/{projectID}", produces = "application/json")
     public ResponseEntity<List<WorkflowWithInput>> getAllWorkflowsByProject(@PathVariable(name = "customerID") String customerID,
-                                                                            @PathVariable(name = "projectID") String projectID) {
+                                                                            @PathVariable(name = "projectID") String projectID, final Principal principal) {
         return ResponseEntity.ok(workflowService.getAllWorkflowsByProject(customerID, projectID));
     }
 
