@@ -31,7 +31,6 @@ import java.util.Map;
 
 @RestController
 @ConditionalOnCoordinator
-@CrossOrigin(origins = {"https://p2001885952trial-trial-dev-ui.cfapps.us10.hana.ondemand.com", "https://na1.saparate.com", ""})
 @RequestMapping("/jobs")
 public class JobsController {
 

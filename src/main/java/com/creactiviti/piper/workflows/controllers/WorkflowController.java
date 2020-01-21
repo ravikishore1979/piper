@@ -2,15 +2,16 @@ package com.creactiviti.piper.workflows.controllers;
 
 import com.creactiviti.piper.core.Coordinator;
 import com.creactiviti.piper.core.job.Job;
-import com.creactiviti.piper.workflows.model.*;
+import com.creactiviti.piper.workflows.model.ReleasePipelineUI;
+import com.creactiviti.piper.workflows.model.Workflow;
+import com.creactiviti.piper.workflows.model.WorkflowVersion;
+import com.creactiviti.piper.workflows.model.WorkflowWithInput;
 import com.creactiviti.piper.workflows.services.WorkflowService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -23,7 +24,6 @@ import java.util.Map;
 
 @Slf4j
 @RestController
-@CrossOrigin(origins = {"https://p2001885952trial-trial-dev-ui.cfapps.us10.hana.ondemand.com", "https://na1.saparate.com"})
 @RequestMapping("/workflows")
 public class WorkflowController {
 
@@ -88,6 +88,9 @@ public class WorkflowController {
             workflow.setWorkflowId(wf.getId() + ":" + wf.getHeadRevision());
         } catch (JsonProcessingException e) {
             log.error("Exception while parsing Workflow POJO {} [{}]", workflowName, workflow.toString(), e);
+            throw e;
+        } catch (Throwable e) {
+            log.error("Exception while saving.", e);
             throw e;
         }
         return ResponseEntity.ok(wf);

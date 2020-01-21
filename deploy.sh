@@ -6,11 +6,13 @@ if [ $# != 2 ]; then
 fi
 localCreds="admin:admin"
 devCreds="saparate:SapaRate@8325"
+qaCreds="saparate:SapaRate@8325"
 demoServerCreds="saparate:SapaRate@8325"
 localIP="192.168.56.101:8080"
 devIP="3.232.119.28:8080"
+qaIP="52.7.53.120:8080"
 demoServerIP1="52.203.169.98:8080"
-demoServerIP2="52.7.53.120:8080"
+demoServerIP2="x.x.x.x:8080"
 rwLoc="/d/repos/piper"
 rssLoc="/d/repos/saparate"
 case $1 in
@@ -25,6 +27,10 @@ case $1 in
   demo)
 	creds=$demoServerCreds
 	ipToDeploy=($demoServerIP1)
+	;;
+  qa)
+	creds=$qaCreds
+	ipToDeploy=($qaIP)
 	;;
 esac
 
