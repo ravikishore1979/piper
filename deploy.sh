@@ -24,7 +24,7 @@ case $1 in
 	;;
   demo)
 	creds=$demoServerCreds
-	ipToDeploy=($demoServerIP1 $demoServerIP2)
+	ipToDeploy=($demoServerIP1)
 	;;
 esac
 

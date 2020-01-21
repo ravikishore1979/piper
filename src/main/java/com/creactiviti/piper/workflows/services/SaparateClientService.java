@@ -18,6 +18,8 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -49,7 +51,6 @@ public class SaparateClientService implements InitializingBean {
             throw new WorkflowException(errorMsg, e);
         }
     }
-
     public String triggerJenkinsDeployJob(String jobName, String authToken, String buildPipelineName, String buildPipelineBuildNumber, String taskInstanceId) {
         JsonNode inputJson = null;
         String buildNumber = null;
@@ -69,6 +70,27 @@ public class SaparateClientService implements InitializingBean {
             throw new WorkflowException(errorMsg, e);
         }
         return buildNumber;
+    }
+
+    public Map<String, JsonNode> getCFDetails(String authToken) {
+        Map<String, JsonNode> cfMap = new HashMap<>();
+        String jobName = null;
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("Authorization", authToken);
+            HttpEntity httpEntity = new HttpEntity<>(headers);
+            ResponseEntity<String> responseEntity = restTemplate.exchange(this.saparateUrl.concat("/cloudfoundary/getAll"), HttpMethod.GET, httpEntity, String.class);
+            String responseBody = responseEntity.getBody();
+            log.info("Retrieved CF details Response: {}", responseBody);
+            JsonNode outputJson = objectMapper.readTree(responseBody);
+            outputJson.elements().forEachRemaining(jsonNode -> {
+                cfMap.put(jsonNode.findPath("id").asText(), jsonNode);
+            });
+            return cfMap;
+        } catch (IOException | RestClientException e) {
+            String errorMsg = String.format("Error while creating the Deploy pipeline job in Jenkins. [%s]", jobName);
+            throw new WorkflowException(errorMsg, e);
+        }
     }
 
 

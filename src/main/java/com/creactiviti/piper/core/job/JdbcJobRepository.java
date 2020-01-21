@@ -24,6 +24,7 @@ import java.util.Map;
 
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.util.Assert;
 
 import com.creactiviti.piper.core.DSL;
@@ -136,11 +137,12 @@ public class JdbcJobRepository implements JobRepository {
   }
 
     private Map<String, Object> getJobObjectMap(ResultSet aRs) throws SQLException {
+        String pipelineId = aRs.getString("pipeline_id");
         Map<String, Object> map = new HashMap<>();
         map.put("id", aRs.getString("id"));
         map.put("status", aRs.getString("status"));
         map.put("currentTask", aRs.getInt("current_task"));
-        map.put("pipelineId", aRs.getString("pipeline_id"));
+        map.put("pipelineId", pipelineId);
         map.put(DSL.INSTANTIATED_BY, aRs.getString("instantiated_by"));
         map.put(DSL.JOB_CYCLE_NAME, aRs.getString("cyclename"));
         map.put("label", aRs.getString("label"));
@@ -153,6 +155,11 @@ public class JdbcJobRepository implements JobRepository {
         map.put("outputs", JsonHelper.readValue(json,aRs.getString("outputs"),Map.class));
         map.put("webhooks", JsonHelper.readValue(json,aRs.getString("webhooks"), List.class));
         map.put(DSL.PARENT_TASK_EXECUTION_ID, aRs.getString("parent_task_execution_id"));
+
+      String[] iddets = pipelineId.split(":");
+      map.put("stagesummary", this.getDesignStageDetails(iddets[0], iddets[1]));
+
+
         return map;
     }
 
@@ -199,4 +206,17 @@ public class JdbcJobRepository implements JobRepository {
 
     }
 
+    private Map<String, String> getDesignStageDetails(String wfId, String wfVersion) {
+      MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
+      sqlParameterSource.addValue("wfid", Long.valueOf(wfId));
+      sqlParameterSource.addValue("wfversion", Long.valueOf(wfVersion));
+      Map<String, String> summaryMap = new HashMap<>();
+
+      SqlRowSet result = jdbc.queryForRowSet("select stage_summary from pipelineversions where versionid = :wfversion and workflowid = :wfid and stage_summary is not null", sqlParameterSource);
+      if(result.next()) {
+        String summary = result.getString("stage_summary");
+          summaryMap = JsonHelper.readValue(json, summary, Map.class);
+      }
+      return summaryMap;
+    }
 }

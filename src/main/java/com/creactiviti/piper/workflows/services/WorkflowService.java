@@ -7,6 +7,7 @@ import com.creactiviti.piper.workflows.repos.IWorkflowRepository;
 import com.creactiviti.piper.workflows.repos.IWorkflowVersionRepository;
 import com.creactiviti.piper.workflows.repos.WorkflowJdbcRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
@@ -23,6 +24,7 @@ import javax.transaction.Transactional;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Slf4j
@@ -154,10 +156,15 @@ public class WorkflowService {
             }
         }
         Workflow savedFlow = saveWorkFlow(wf, workflowVersion);
-
+        WorkflowStageSummary wfStageSummary = new WorkflowStageSummary();
+        StringBuilder envs = new StringBuilder();
+        Map<String, JsonNode> cfMap = this.saparateClientService.getCFDetails(authToken);
         rwfYaml.getTasks().forEach(task -> {
             if(task instanceof JenkinsJobTask) {
                 JenkinsJobTask jenkinsJobTask = (JenkinsJobTask) task;
+                if (cfMap.get(jenkinsJobTask.getCfCredentialsID()) != null) {
+                    envs.append(",").append(cfMap.get(jenkinsJobTask.getCfCredentialsID()).findPath("name").textValue());
+                }
                 String jenkinsDeployJobName = workflowName.concat("_" + jenkinsJobTask.getName())
                         .concat("_"+savedFlow.getId())
                         .concat("_"+savedFlow.getHeadRevision());
@@ -170,6 +177,8 @@ public class WorkflowService {
                 }
             }
         });
+        wfStageSummary.setEnvironments((envs.indexOf(",") == 0) ? envs.substring(1) : "");
+        workflowVersion.setStagesSummary(this.objectMapper.writeValueAsString(wfStageSummary));
         workflowVersion.setWorkflow(yamlMapper.writeValueAsString(rwfYaml));
         workflowVersion.setVersionID(savedFlow.getHeadRevision());
         wfVersionRepository.save(workflowVersion);

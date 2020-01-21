@@ -52,6 +52,7 @@ create table if not exists pipelines (
     createdby varchar(50),
     createdtime datetime,
     headrevision bigint,
+    stage_summary varchar(100),
     unique index name_ix (customerId, projectId, workflowname)
 ) AUTO_INCREMENT = 10000;
 

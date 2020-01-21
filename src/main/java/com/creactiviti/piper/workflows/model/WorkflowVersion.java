@@ -26,4 +26,6 @@ public class WorkflowVersion {
     private String workflow;
     @Column(name="buildinputjson")
     private String buildInputJson;
+    @Column(name = "stage_summary")
+    private String stagesSummary;
 }
