@@ -9,7 +9,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 
 @Slf4j
 @Configuration
-@EnableWebMvc
 public class WorkflowWebConfigurer extends WebMvcConfigurerAdapter {
 
     @Value("${rate.cors.origins}")
