@@ -1,5 +1,6 @@
 package com.creactiviti.piper.workflows.model;
 
+import com.creactiviti.piper.validation.SafeText;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -9,6 +10,9 @@ import org.springframework.core.io.ClassPathResource;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+
+import static com.creactiviti.piper.validation.ValidateRegex.REGEX_DESC;
+import static com.creactiviti.piper.validation.ValidateRegex.REGEX_NUMERIC;
 
 @Getter
 @Setter
@@ -34,20 +38,28 @@ public class JenkinsJobTask extends WorkflowTask {
         }
     }
 
+    @SafeText(regex = REGEX_DESC)
     private String jenkinsJobName;
+    @SafeText(regex = REGEX_NUMERIC)
     private String jenkinsBuildNumber;
 
     /**
      * This is runtime data.
      * Value will be set when this task started and a jenkins build is triggered.
      */
+    @SafeText
     private String jenkinsBuildStatus;
+    @SafeText(regex = REGEX_NUMERIC)
     private String cfCredentialsID;
+    @SafeText
     private String waitForMessage;
     @Builder.Default
     private String type = "deployTask";
+    @SafeText(regex = REGEX_DESC)
     private String buildJobName;
+    @SafeText(regex = REGEX_NUMERIC)
     private String buildJobNumber;
+    @SafeText
     private String jenkinsAuthToken;
 
     @JsonIgnore

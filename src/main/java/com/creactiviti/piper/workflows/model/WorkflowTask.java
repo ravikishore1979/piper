@@ -1,5 +1,6 @@
 package com.creactiviti.piper.workflows.model;
 
+import com.creactiviti.piper.validation.SafeText;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import lombok.Getter;
@@ -7,6 +8,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
+
+import static com.creactiviti.piper.validation.ValidateRegex.*;
 
 @Getter
 @Setter
@@ -22,7 +25,10 @@ import lombok.experimental.SuperBuilder;
         @JsonSubTypes.Type(value = JenkinsJobTask.class, name = "deployTask")
 })
 public class WorkflowTask {
+    @SafeText(regex = REGEX_DESC)
     private String name;
+    @SafeText(regex = REGEX_DESC)
     private String label;
+    @SafeText(regex = REGEX_DESC)
     private String stageName;
 }

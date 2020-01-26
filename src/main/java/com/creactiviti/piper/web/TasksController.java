@@ -5,11 +5,14 @@ import com.creactiviti.piper.core.Coordinator;
 import com.creactiviti.piper.core.Page;
 import com.creactiviti.piper.core.job.Job;
 import com.creactiviti.piper.core.task.TaskActions;
+import com.creactiviti.piper.validation.SafeText;
 import com.creactiviti.piper.workflows.model.HumanTaskAssignee;
 import com.creactiviti.piper.workflows.repos.WorkflowJdbcRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.validator.constraints.Email;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -18,6 +21,7 @@ import java.io.IOException;
 import java.util.Map;
 
 @Slf4j
+@Validated
 @RestController
 @RequestMapping("/tasks")
 public class TasksController {
@@ -28,8 +32,9 @@ public class TasksController {
     private WorkflowJdbcRepository workflowJdbcRepository;
 
     @PutMapping("/{taskId}")
-    public Job performTaskAction(@PathVariable(name = "taskId") String taskId, @RequestParam(name = "action") TaskActions action,
-                            @RequestBody Map<String, Object> taskOutput) {
+    public Job performTaskAction(@PathVariable(name = "taskId") @SafeText String taskId,
+                                 @RequestParam(name = "action") TaskActions action,
+                                 @RequestBody Map<String, Object> taskOutput) {
 
         switch (action) {
             case FINISHED: {
@@ -49,7 +54,8 @@ public class TasksController {
     }
 
     @GetMapping("/user")
-    public Page<HumanTaskAssignee> getWaitingTasksByUser(@RequestParam(name = "userid") String userId, @RequestParam(value="p",defaultValue="1") Integer aPageNumber) {
+    public Page<HumanTaskAssignee> getWaitingTasksByUser(@RequestParam(name = "userid") @Email String userId,
+                                                         @RequestParam(value="p",defaultValue="1") int aPageNumber) {
         return workflowJdbcRepository.findTasksToActByUser(userId, aPageNumber);
     }
 

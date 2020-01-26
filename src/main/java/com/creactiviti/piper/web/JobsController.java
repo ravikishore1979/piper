@@ -23,6 +23,7 @@ import com.creactiviti.piper.core.job.JobRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
@@ -32,6 +33,7 @@ import java.util.Map;
 @RestController
 @ConditionalOnCoordinator
 @RequestMapping("/jobs")
+@Validated
 public class JobsController {
 
   @Autowired private JobRepository jobRepository;
@@ -43,7 +45,7 @@ public class JobsController {
   }
 
   @GetMapping(value="/latest")
-  public Page<Job> getRecentJobs (@RequestParam(value="limit", defaultValue="10") Integer recordCount) {
+  public Page<Job> getRecentJobs (@RequestParam(value="limit", defaultValue="10") int recordCount) {
     return jobRepository.findRecentJobs(recordCount);
   }
   

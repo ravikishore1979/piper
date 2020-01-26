@@ -1,8 +1,11 @@
 package com.creactiviti.piper.workflows.model;
 
+import com.creactiviti.piper.validation.SafeText;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+
+import static com.creactiviti.piper.validation.ValidateRegex.REGEX_DESC;
 
 @Getter
 @Setter
@@ -11,6 +14,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public abstract class HumanWorkflowTask extends WorkflowTask {
     @JsonProperty("waitUntil")
+    @SafeText
     protected String waitForMessage;
     @Builder.Default
     protected TaskCategory taskCategory = TaskCategory.TASK;
@@ -25,5 +29,6 @@ public abstract class HumanWorkflowTask extends WorkflowTask {
     protected String assignedTo;
     @Builder.Default
     protected AssignType assignType=AssignType.USER;
+    @SafeText(regex = REGEX_DESC)
     protected String message;
 }

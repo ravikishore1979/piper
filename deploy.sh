@@ -14,7 +14,7 @@ qaIP="52.7.53.120:8080"
 demoServerIP1="52.203.169.98:8080"
 demoServerIP2="x.x.x.x:8080"
 rwLoc="/d/repos/piper"
-rssLoc="/d/repos/saparate"
+rssLoc="/d/wf/repotest/saparate"
 case $1 in
   local)
 	creds=$localCreds

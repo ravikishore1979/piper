@@ -2,6 +2,7 @@ package com.creactiviti.piper.workflows.controllers;
 
 import com.creactiviti.piper.core.Coordinator;
 import com.creactiviti.piper.core.job.Job;
+import com.creactiviti.piper.validation.SafeText;
 import com.creactiviti.piper.workflows.model.ReleasePipelineUI;
 import com.creactiviti.piper.workflows.model.Workflow;
 import com.creactiviti.piper.workflows.model.WorkflowVersion;
@@ -13,18 +14,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.validation.Valid;
 import java.io.IOException;
 import java.security.Principal;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import static com.creactiviti.piper.validation.ValidateRegex.*;
+
 @Slf4j
 @RestController
 @RequestMapping("/workflows")
+@Validated
 public class WorkflowController {
 
     @Autowired
@@ -33,9 +39,9 @@ public class WorkflowController {
     private Coordinator coordinator;
 
     @GetMapping(value = "/{customerID}/{projectID}/{wfName}", produces = "application/json")
-    public ResponseEntity<ReleasePipelineUI> getWorkflowByName(@PathVariable(name = "customerID") String customerID,
-                                                               @PathVariable(name = "projectID") String projectID,
-                                                               @PathVariable(name = "wfName") String workflowName,
+    public ResponseEntity<ReleasePipelineUI> getWorkflowByName(@PathVariable(name = "customerID") @SafeText String customerID,
+                                                               @PathVariable(name = "projectID") @SafeText String projectID,
+                                                               @PathVariable(name = "wfName") @SafeText(regex = REGEX_DESC) String workflowName,
                                                                @RequestParam(name = "wfversion", defaultValue = "0") Long versionId) {
         Assert.noNullElements(new String[]{customerID, projectID, workflowName}, "CustomerID, ProjectID and PipelineName cannot be empty");
         log.info("Retrieving WF details by name {}", workflowName);
@@ -46,8 +52,10 @@ public class WorkflowController {
     }
 
     @GetMapping(value = "/{customerID}/{projectID}", produces = "application/json")
-    public ResponseEntity<List<WorkflowWithInput>> getAllWorkflowsByProject(@PathVariable(name = "customerID") String customerID,
-                                                                            @PathVariable(name = "projectID") String projectID, final Principal principal) {
+    public ResponseEntity<List<WorkflowWithInput>> getAllWorkflowsByProject(@PathVariable(name = "customerID") @SafeText String customerID,
+                                                                            @PathVariable(name = "projectID") @SafeText String projectID,
+                                                                            final Principal principal) {
+        log.info("Logged User: {}", ((principal != null) ? principal.getName() : "EMPTY"));
         return ResponseEntity.ok(workflowService.getAllWorkflowsByProject(customerID, projectID));
     }
 
@@ -74,10 +82,10 @@ public class WorkflowController {
     }
 
     @PostMapping(value = "/{customerID}/{projectID}/{wfName}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<Workflow> saveWorkflowJson(@PathVariable(name = "customerID") String customerID,
-                                    @PathVariable(name = "projectID") String projectID,
-                                    @PathVariable(name = "wfName") String workflowName,
-                                    @RequestBody ReleasePipelineUI workflow,
+    public ResponseEntity<Workflow> saveWorkflowJson(@PathVariable(name = "customerID") @SafeText String customerID,
+                                    @PathVariable(name = "projectID") @SafeText String projectID,
+                                    @PathVariable(name = "wfName") @SafeText(regex = REGEX_DESC) String workflowName,
+                                    @RequestBody @Valid ReleasePipelineUI workflow,
                                     @RequestHeader(name = "Authorization") String authToken) throws IOException {
         Assert.notNull("Authorization token cannot be empty", authToken);
         Assert.noNullElements(new String[]{customerID, projectID, workflowName}, "CustomerID, ProjectID and PipelineName cannot be empty");
@@ -97,9 +105,9 @@ public class WorkflowController {
     }
 
     @PostMapping(value = "/trigger/{customerID}/{projectID}/{wfName}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<Job> triggerWorkflow(@PathVariable(name = "customerID") String customerID,
-                                               @PathVariable(name = "projectID") String projectID,
-                                               @PathVariable(name = "wfName") String wfName,
+    public ResponseEntity<Job> triggerWorkflow(@PathVariable(name = "customerID") @SafeText String customerID,
+                                               @PathVariable(name = "projectID") @SafeText String projectID,
+                                               @PathVariable(name = "wfName") @SafeText(regex = REGEX_DESC) String wfName,
                                                @RequestBody Map<String, Object> jobInput,
                                                @RequestHeader(name = "Authorization") String authToken) {
         Assert.notNull("Authorization token cannot be empty", authToken);
