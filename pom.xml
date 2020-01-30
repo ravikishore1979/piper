@@ -222,6 +222,9 @@
 				<groupId>org.apache.tomcat.maven</groupId>
 				<artifactId>tomcat8-maven-plugin</artifactId>
 				<version>3.0-r1756463</version>
+				<configuration>
+					<path>/${project.build.finalName}</path>
+				</configuration>
 				<!--<configuration>
 					<url>http:// localhost:8080/manager/text</url>
 					<server>TomcatServer</server>    *(From maven > settings.xml)*
