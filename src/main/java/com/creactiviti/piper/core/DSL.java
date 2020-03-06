@@ -110,6 +110,10 @@ public class DSL {
 
   public static final String JOB_CYCLE_NAME = "cycleName";
 
+  public static final String WORKFLOW_ID = "workflowId";
+
+  public static final String WORKFLOW_VERSION_ID = "workflowVersionId";
+
   public static final String TASK_ACTION_INPUT = "taskCompleteInput";
 
   public static final String TASK_ACTION = "taskAction";

@@ -54,9 +54,11 @@ public class WorkflowController {
     @GetMapping(value = "/{customerID}/{projectID}", produces = "application/json")
     public ResponseEntity<List<WorkflowWithInput>> getAllWorkflowsByProject(@PathVariable(name = "customerID") @SafeText String customerID,
                                                                             @PathVariable(name = "projectID") @SafeText String projectID,
+                                                                            @RequestHeader(value = "XU") String userId,
                                                                             final Principal principal) {
-        log.info("Logged User: {}", ((principal != null) ? principal.getName() : "EMPTY"));
-        return ResponseEntity.ok(workflowService.getAllWorkflowsByProject(customerID, projectID));
+        log.info("Logged User: {} -- header user: {}", ((principal != null) ? principal.getName() : "EMPTY"), userId);
+        //Assert.hasText(userId, "UserId/createdBy is not passed in header");
+        return ResponseEntity.ok(workflowService.getAllWorkflowsByProjectAndCreatedBy(customerID, projectID, userId));
     }
 
     @PostMapping(value = "/workflowWithFile", produces = MediaType.APPLICATION_JSON_UTF8_VALUE, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

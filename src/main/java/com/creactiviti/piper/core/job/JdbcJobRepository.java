@@ -83,6 +83,20 @@ public class JdbcJobRepository implements JobRepository {
     return resultPage;
   }
 
+  /*
+  select j.* from pipelines as pi join job as j on j.workflow_id = pi.workflowid and j.wfversion_id = pi.headrevision where pi.createdby = 'ram1@yahoo.com' order by j.create_time desc limit 10;
+   */
+  @Override
+  public Page<Job> findRecentJobsByCreatedUser(String createdBy, int limit) {
+    MapSqlParameterSource params = new MapSqlParameterSource();
+    params.addValue("userid", createdBy);
+    params.addValue("count", limit);
+    List<Job> list = jdbc.query("select j.* from pipelines as pi join job as j on j.workflow_id = pi.workflowid where pi.createdby = :userid order by j.create_time desc limit :count", params, this::jobRowMappperWithoutExecution);
+    ResultPage<Job> resultPage = new ResultPage<>(Job.class);
+    resultPage.setItems(list);
+    return resultPage;
+  }
+
   @Override
   public Job merge (Job aJob) {
     MapSqlParameterSource sqlParameterSource = createSqlParameterSource(aJob);
@@ -93,7 +107,7 @@ public class JdbcJobRepository implements JobRepository {
   @Override
   public void create (Job aJob) {
     MapSqlParameterSource sqlParameterSource = createSqlParameterSource(aJob);
-    jdbc.update("insert into job (id,create_time,start_time,status,current_task,pipeline_id,label,tags,priority,inputs,webhooks,outputs,parent_task_execution_id,instantiated_by,cyclename) values (:id,:createTime,:startTime,:status,:currentTask,:pipelineId,:label,:tags,:priority,:inputs,:webhooks,:outputs,:parentTaskExecutionId, :instantiated_by, :cyclename)", sqlParameterSource);
+    jdbc.update("insert into job (id,create_time,start_time,status,current_task,pipeline_id,label,tags,priority,inputs,webhooks,outputs,parent_task_execution_id,instantiated_by,cyclename,workflow_id,wfversion_id) values (:id,:createTime,:startTime,:status,:currentTask,:pipelineId,:label,:tags,:priority,:inputs,:webhooks,:outputs,:parentTaskExecutionId, :instantiated_by, :cyclename, :wfId, :wfVersionId)", sqlParameterSource);
   }
 
   private MapSqlParameterSource createSqlParameterSource(Job aJob) {
@@ -119,6 +133,8 @@ public class JdbcJobRepository implements JobRepository {
     sqlParameterSource.addValue("parentTaskExecutionId", job.getParentTaskExecutionId());
     sqlParameterSource.addValue("instantiated_by", job.getInstantiatedBy());
     sqlParameterSource.addValue("cyclename", job.getJobCycleName());
+    sqlParameterSource.addValue("wfId", job.getWorkflowId());
+    sqlParameterSource.addValue("wfVersionId", job.getWorkflowVersionId());
     return sqlParameterSource;
   }
   
@@ -155,6 +171,8 @@ public class JdbcJobRepository implements JobRepository {
         map.put("outputs", JsonHelper.readValue(json,aRs.getString("outputs"),Map.class));
         map.put("webhooks", JsonHelper.readValue(json,aRs.getString("webhooks"), List.class));
         map.put(DSL.PARENT_TASK_EXECUTION_ID, aRs.getString("parent_task_execution_id"));
+        map.put(DSL.WORKFLOW_ID, aRs.getLong("workflow_id"));
+        map.put(DSL.WORKFLOW_VERSION_ID, aRs.getLong("wfversion_id"));
 
       String[] iddets = pipelineId.split(":");
       map.put("stagesummary", this.getDesignStageDetails(iddets[0], iddets[1]));

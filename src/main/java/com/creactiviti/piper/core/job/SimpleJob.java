@@ -221,4 +221,21 @@ public class SimpleJob extends MapObject implements Job {
     set(DSL.WEBHOOKS,aWebhooks);
   }
 
+  @Override
+  public long getWorkflowId() {
+    return getLong(DSL.WORKFLOW_ID);
+  }
+
+  @Override
+  public long getWorkflowVersionId() {
+    return getLong(DSL.WORKFLOW_VERSION_ID);
+  }
+
+  public void setWorkflowId(long wfId) {
+    set(DSL.WORKFLOW_ID, wfId);
+  }
+
+  public void setWorkflowVersionId(long wfVersionId) {
+    set(DSL.WORKFLOW_VERSION_ID, wfVersionId);
+  }
 }

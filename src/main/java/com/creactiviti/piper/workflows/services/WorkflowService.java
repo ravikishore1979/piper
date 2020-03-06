@@ -243,6 +243,12 @@ public class WorkflowService {
         return workflowList;
     }
 
+    public List<WorkflowWithInput> getAllWorkflowsByProjectAndCreatedBy(String customerID, String projectID, String createdBy) {
+        List<WorkflowWithInput> workflowList = workflowJdbcRepository.findAllByCustomerIdProjectIdAndCreatedBy(customerID, projectID, createdBy);
+        Assert.notEmpty(workflowList, String.format("Unable to retrieve workflows for %s and %s", customerID, projectID));
+        return workflowList;
+    }
+
     /**
      * Returns the Release Pipeline UI Object that is required to render the Release Pipeline UI for editing.
      * @param customerID

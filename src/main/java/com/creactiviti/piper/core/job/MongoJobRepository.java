@@ -27,6 +27,7 @@ import org.bson.codecs.EncoderContext;
 import org.bson.conversions.Bson;
 
 import javax.annotation.PostConstruct;
+import javax.el.MethodNotFoundException;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
@@ -115,6 +116,11 @@ public class MongoJobRepository implements JobRepository {
   @Override
   public Page<Job> findRecentJobs(int limit) {
     throw new NoSuchElementException("Not supported.");
+  }
+
+  @Override
+  public Page<Job> findRecentJobsByCreatedUser(String createdBy, int limit) {
+    throw new MethodNotFoundException("Not supported");
   }
 
   @Override

@@ -15,10 +15,7 @@
  */
 package com.creactiviti.piper.core;
 
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import com.creactiviti.piper.core.task.*;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -87,6 +84,7 @@ public class Coordinator {
     Assert.notNull(aJobParams,"request can't be null");
     MapObject jobParams = MapObject.of(aJobParams);
     String pipelineId = jobParams.getRequiredString(PIPELINE_ID);
+    long[] ids = Arrays.stream(pipelineId.split(":")).map(String::trim).mapToLong(Long::valueOf).toArray();
     pipelineRepository.validateInputForRun(jobParams);
     Pipeline pipeline = pipelineRepository.findOne(pipelineId);
     Assert.notNull(pipeline,String.format("Unkown pipeline: %s", pipelineId));
@@ -111,6 +109,8 @@ public class Coordinator {
     job.setInputs(inputs);
     job.setInstantiatedBy(jobParams.getRequiredString(INSTANTIATED_BY));
     job.setJobCycleName(jobParams.getRequiredString(JOB_CYCLE_NAME));
+    job.setWorkflowId(ids[0]);
+    job.setWorkflowVersionId(ids[1]);
     log.debug("Job {} started",job.getId());
     jobRepository.create(job);
     

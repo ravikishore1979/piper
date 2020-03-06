@@ -27,7 +27,12 @@ public interface JobRepository {
 
   Page<Job> findRecentJobs(int limit);
 
-  Job merge (Job aJob);
+    /*
+      select j.* from pipelines as pi join job as j on j.workflow_id = pi.workflowid and j.wfversion_id = pi.headrevision where pi.createdby = 'ram1@yahoo.com' order by j.create_time desc limit 10;
+       */
+    Page<Job> findRecentJobsByCreatedUser(String createdBy, int limit);
+
+    Job merge (Job aJob);
   
   Job findJobByTaskId (String aTaskId);
   
@@ -39,5 +44,5 @@ public interface JobRepository {
 
   int countJobsByJobId(String s);
 
-    Page<Job> findJobsByWorkflowID(String wfID, int limit);
+  Page<Job> findJobsByWorkflowID(String wfID, int limit);
 }

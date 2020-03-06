@@ -152,4 +152,8 @@ public interface Job extends Errorable, Prioritizable {
    * @return
    */
   String getJobCycleName();
+
+  long getWorkflowId();
+
+  long getWorkflowVersionId();
 }

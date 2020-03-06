@@ -14,7 +14,11 @@ create table if not exists job (
   outputs text not null,
   parent_task_execution_id varchar(256),
   instantiated_by varchar(50),
-  cyclename varchar(50)
+  cyclename varchar(50),
+  workflow_id bigint,
+  wfversion_id bigint,
+  index job_pipelines_ix(workflow_id),
+  foreign key(workflow_id) references pipelines(workflowid)
 );
 
 create table if not exists task_execution  (

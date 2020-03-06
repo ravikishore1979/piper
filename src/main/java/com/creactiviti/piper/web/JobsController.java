@@ -45,8 +45,10 @@ public class JobsController {
   }
 
   @GetMapping(value="/latest")
-  public Page<Job> getRecentJobs (@RequestParam(value="limit", defaultValue="10") int recordCount) {
-    return jobRepository.findRecentJobs(recordCount);
+  public Page<Job> getRecentJobs (@RequestParam(value="limit", defaultValue="10") int recordCount,
+                                  @RequestHeader(value = "XU") String userId) {
+//    return jobRepository.findRecentJobs(recordCount);
+    return jobRepository.findRecentJobsByCreatedUser(userId, recordCount);
   }
   
   @PostMapping("/")

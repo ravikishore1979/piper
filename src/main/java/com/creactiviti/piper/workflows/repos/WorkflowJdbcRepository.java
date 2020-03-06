@@ -40,6 +40,18 @@ public class WorkflowJdbcRepository {
         return list;
     }
 
+    public List<WorkflowWithInput> findAllByCustomerIdProjectIdAndCreatedBy(String customerID, String projectID, String createdBy) {
+        Map<String, String> params =  new HashMap<>();
+        params.put("customerID", customerID);
+        params.put("projectID", projectID);
+        params.put("createdBy", createdBy);
+        List<WorkflowWithInput> list = jdbc.query("select p.*, pv.buildinputjson from pipelines as p join pipelineversions as pv  " +
+                    "on p.workflowid = pv.workflowid and p.headrevision = versionid " +
+                    "where p.customerid = :customerID and p.projectid = :projectID and p.createdby = :createdBy " +
+                    "order by p.createdtime desc", params, this::workflowMapper);
+        return list;
+    }
+
     public ResultPage<HumanTaskAssignee> findTasksToActByUser(String userId, Integer aPageNumber) {
 
         log.info("Retrieving tasks assigned to user {}", userId);
